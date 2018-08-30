@@ -3,12 +3,13 @@
 // MVID: 2BCD559E-1E00-4581-80D1-080BCD16D4B6
 // Assembly location: C:\Windows\Microsoft.NET\Framework\v4.0.30319\System.Numerics.dll
 
+using System;
 using System.Globalization;
 
 // ReSharper disable once CheckNamespace
 // ReSharper disable CompareOfFloatsByEqualityOperator
 
-namespace System.Numerics
+namespace Rainbow
 {
 	public struct Complex : IEquatable<Complex>, IFormattable
 	{
