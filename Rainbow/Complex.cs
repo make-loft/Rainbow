@@ -19,22 +19,19 @@ namespace Rainbow
 		public static readonly Complex ImaginaryOne = new Complex(0.0, 1.0);
 		public static readonly Complex One = RealOne;
 
-		private readonly double _imaginary;
-		private readonly double _real;
-
-		public Complex(double real = 0.0, double imaginary = 0.0)
+        public Complex(double real = 0.0, double imaginary = 0.0)
 		{
-			_real = real;
-			_imaginary = imaginary;
+			Real = real;
+			Imaginary = imaginary;
 		}
 
-		public double Real => _real;
-		public double Imaginary => _imaginary;
-		public double Magnitude => Abs(this);
-		public double Phase => Math.Atan2(_imaginary, _real);
+        public double Real { get; }
+        public double Imaginary { get; }
+        public double Magnitude => Abs(this);
+		public double Phase => Math.Atan2(Imaginary, Real);
 		
-		public bool Is(Complex value) => _real == value._real && _imaginary == value._imaginary;
-		public bool IsNot(Complex value) => _real != value._real && _imaginary != value._imaginary;
+		public bool Is(Complex value) => Real == value.Real && Imaginary == value.Imaginary;
+		public bool IsNot(Complex value) => Real != value.Real && Imaginary != value.Imaginary;
 		public bool Is(object obj) => obj is Complex value && Is(value);
 		public bool IsNot(object obj) => !Is(obj);
 		
@@ -57,25 +54,25 @@ namespace Rainbow
 
 		public static explicit operator Complex(decimal value) => new Complex((double) value);
 
-		public static Complex operator -(Complex value) => new Complex(-value._real, -value._imaginary);
+		public static Complex operator -(Complex value) => new Complex(-value.Real, -value.Imaginary);
 
 		public static Complex operator +(Complex left, Complex right) => new Complex(
-			left._real + right._real, left._imaginary + right._imaginary);
+			left.Real + right.Real, left.Imaginary + right.Imaginary);
 
 		public static Complex operator -(Complex left, Complex right) => new Complex(
-			left._real - right._real, left._imaginary - right._imaginary);
+			left.Real - right.Real, left.Imaginary - right.Imaginary);
 
 		public static Complex operator *(Complex left, Complex right) => new Complex(
-			left._real * right._real - left._imaginary * right._imaginary,
-			left._imaginary * right._real + left._real * right._imaginary);
+			left.Real * right.Real - left.Imaginary * right.Imaginary,
+			left.Imaginary * right.Real + left.Real * right.Imaginary);
 
 		public static Complex operator /(Complex left, Complex right)
 		{
-			var d2 = right._real;
-			var d3 = right._imaginary;
+			var d2 = right.Real;
+			var d3 = right.Imaginary;
 			var flag = Math.Abs(d3) < Math.Abs(d2);
-			var d0 = flag ? left._real : left._imaginary;
-			var d1 = flag ? left._imaginary : left._real;
+			var d0 = flag ? left.Real : left.Imaginary;
+			var d1 = flag ? left.Imaginary : left.Real;
 			
 			var d4 = d3 / d2;
 			var d5 = d2 + d3 * d4;
@@ -89,7 +86,7 @@ namespace Rainbow
 		public static Complex Multiply(Complex left, Complex right) => left * right;
 		public static Complex Divide(Complex dividend, Complex divisor) => dividend / divisor;
 
-		public static double Abs(Complex value) => Abs(value._real, value._imaginary);
+		public static double Abs(Complex value) => Abs(value.Real, value.Imaginary);
 		
 		public static double Abs(double real, double imaginary)
 		{
@@ -111,23 +108,23 @@ namespace Rainbow
 			}
 		}
 
-		public static Complex Conjugate(Complex value) => new Complex(value._real, -value._imaginary);
+		public static Complex Conjugate(Complex value) => new Complex(value.Real, -value.Imaginary);
 		public static Complex Reciprocal(Complex value) => value.Is(Zero) ? Zero : One / value;
 		
 		public string ToString(string format, IFormatProvider provider) =>
 			string.Format(provider, "({0}, {1})",
-				_real.ToString(format, provider),
-				_imaginary.ToString(format, provider));
+				Real.ToString(format, provider),
+				Imaginary.ToString(format, provider));
 
-		public override string ToString() => string.Format(CultureInfo.CurrentCulture, "({0}, {1})", _real, _imaginary);
+		public override string ToString() => string.Format(CultureInfo.CurrentCulture, "({0}, {1})", Real, Imaginary);
 
 		public string ToString(string format) => string.Format(CultureInfo.CurrentCulture, "({0}, {1})",
-			_real.ToString(format, CultureInfo.CurrentCulture),
-			_imaginary.ToString(format, CultureInfo.CurrentCulture));
+			Real.ToString(format, CultureInfo.CurrentCulture),
+			Imaginary.ToString(format, CultureInfo.CurrentCulture));
 
-		public string ToString(IFormatProvider provider) => string.Format(provider, "({0}, {1})", _real, _imaginary);
+		public string ToString(IFormatProvider provider) => string.Format(provider, "({0}, {1})", Real, Imaginary);
 
-		public override int GetHashCode() => _real.GetHashCode() % 99999997 ^ _imaginary.GetHashCode();
+		public override int GetHashCode() => Real.GetHashCode() % 99999997 ^ Imaginary.GetHashCode();
 
 		public static Complex Sin(double real, double imaginary) =>
 			new Complex(Math.Sin(real) * Math.Cosh(imaginary), Math.Cos(real) * Math.Sinh(imaginary));
@@ -141,12 +138,12 @@ namespace Rainbow
 		public static Complex Cosh(double real, double imaginary) =>
 			new Complex(Math.Cosh(real) * Math.Cos(imaginary), Math.Sinh(real) * Math.Sin(imaginary));
 
-		public static Complex Sin(Complex value) => Sin(value._real, value._imaginary);
-		public static Complex Sinh(Complex value) => Sinh(value._real, value._imaginary);
+		public static Complex Sin(Complex value) => Sin(value.Real, value.Imaginary);
+		public static Complex Sinh(Complex value) => Sinh(value.Real, value.Imaginary);
 		public static Complex Asin(Complex value) => -ImaginaryOne * Log(ImaginaryOne * value + Sqrt(One - value * value));
 
-		public static Complex Cos(Complex value) => Cos(value._real, value._imaginary);	  
-		public static Complex Cosh(Complex value) => Cosh(value._real, value._imaginary);
+		public static Complex Cos(Complex value) => Cos(value.Real, value.Imaginary);	  
+		public static Complex Cosh(Complex value) => Cosh(value.Real, value.Imaginary);
 		public static Complex Acos(Complex value) => -ImaginaryOne * Log(value + ImaginaryOne * Sqrt(One - value * value));
 
 		public static Complex Tan(Complex value) => Sin(value) / Cos(value);
@@ -154,7 +151,7 @@ namespace Rainbow
 		public static Complex Atan(Complex value) => ImaginaryOne / RealTwo * (Log(One - ImaginaryOne * value) - Log(One + ImaginaryOne * value));
 
 		public static Complex Log(Complex value) =>
-			new Complex(Math.Log(Abs(value)), Math.Atan2(value._imaginary, value._real));
+			new Complex(Math.Log(Abs(value)), Math.Atan2(value.Imaginary, value.Real));
 
 		public static Complex Log(Complex value, double baseValue) => Log(value) / Log(baseValue);
 		public static Complex Log10(Complex value) => Scale(Log(value), 0.43429448190325);
@@ -162,7 +159,7 @@ namespace Rainbow
 		public static Complex FromPolarCoordinates(double magnitude, double phase) =>
 			new Complex(magnitude * Math.Cos(phase), magnitude * Math.Sin(phase));
 		
-		public static Complex Exp(Complex value) => FromPolarCoordinates(Math.Exp(value._real), value._imaginary);
+		public static Complex Exp(Complex value) => FromPolarCoordinates(Math.Exp(value.Real), value.Imaginary);
 		public static Complex Sqrt(Complex value) => FromPolarCoordinates(Math.Sqrt(value.Magnitude), value.Phase / 2.0);
 
 		public static Complex Pow(Complex value, Complex power)
@@ -171,10 +168,10 @@ namespace Rainbow
 				return One;
 			if (value == Zero)
 				return Zero;
-			var x = value._real;
-			var y1 = value._imaginary;
-			var y2 = power._real;
-			var num1 = power._imaginary;
+			var x = value.Real;
+			var y1 = value.Imaginary;
+			var y2 = power.Real;
+			var num1 = power.Imaginary;
 			var num2 = Abs(value);
 			var num3 = Math.Atan2(y1, x);
 			var num4 = y2 * num3 + num1 * Math.Log(num2);
@@ -184,7 +181,7 @@ namespace Rainbow
 
 		public static Complex Pow(Complex value, double power) => Pow(value, new Complex(power));
 
-		public static Complex Scale(Complex value, double factor) => Scale(value._real, value._imaginary, factor);
+		public static Complex Scale(Complex value, double factor) => Scale(value.Real, value.Imaginary, factor);
 		
 		public static Complex Scale(double real, double imaginary, double factor) =>
 			new Complex(factor * real, factor * imaginary);
