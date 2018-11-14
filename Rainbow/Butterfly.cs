@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Rainbow
 {
@@ -27,7 +29,13 @@ namespace Rainbow
 
 		public static double InvertSign(this double d, bool negate) => negate ? -d : d;
 
-		public static Complex[] DecimationInTime(this Complex[] frame, bool direct)
+		public static Complex[] DecimationInTime(this IEnumerable<Complex> frame, bool direct) =>
+			frame.ToArray()._DecimationInTime(direct);
+
+		public static Complex[] _DecimationInFrequency(this IEnumerable<Complex> frame, bool direct) =>
+			frame.ToArray()._DecimationInFrequency(direct);
+
+		private static Complex[] _DecimationInTime(this Complex[] frame, bool direct)
 		{
 			if (frame.Length == 1) return frame;
 			var frameHalfSize = frame.Length >> 1; // frame.Length/2
@@ -42,25 +50,27 @@ namespace Rainbow
 				frameEven[i] = frame[j];
 			}
 
-			var spectrumOdd = DecimationInTime(frameOdd, direct);
-			var spectrumEven = DecimationInTime(frameEven, direct);
+			var spectrumOdd = _DecimationInTime(frameOdd, direct);
+			var spectrumEven = _DecimationInTime(frameEven, direct);
 
 			var arg = (DoublePi / frameFullSize).InvertSign(direct);
 			var omegaPowBase = new Complex(Math.Cos(arg), Math.Sin(arg));
 			var omega = Complex.One;
-			var spectrum = new Complex[frameFullSize];
+			var spectrum = frame; // new Complex[frameFullSize];
 
 			for (var j = 0; j < frameHalfSize; j++)
 			{
-				spectrum[j] = spectrumEven[j] + omega * spectrumOdd[j];
-				spectrum[j + frameHalfSize] = spectrumEven[j] - omega * spectrumOdd[j];
+				var a = spectrumEven[j];
+				var b = spectrumOdd[j];
+				spectrum[j] = a + omega * b;
+				spectrum[j + frameHalfSize] = a - omega * b;
 				omega *= omegaPowBase;
 			}
 
 			return spectrum;
 		}
 
-		public static Complex[] DecimationInFrequency(this Complex[] frame, bool direct)
+		private static Complex[] _DecimationInFrequency(this Complex[] frame, bool direct)
 		{
 			if (frame.Length == 1) return frame;
 			var frameHalfSize = frame.Length >> 1; // frame.Length/2
@@ -69,12 +79,14 @@ namespace Rainbow
 			var arg = (DoublePi / frameFullSize).InvertSign(direct);
 			var omegaPowBase = new Complex(Math.Cos(arg), Math.Sin(arg));
 			var omega = Complex.One;
-			var spectrum = new Complex[frameFullSize];
+			var spectrum = frame; // new Complex[frameFullSize];
 
 			for (var j = 0; j < frameHalfSize; j++)
 			{
-				spectrum[j] = frame[j] + frame[j + frameHalfSize];
-				spectrum[j + frameHalfSize] = omega * (frame[j] - frame[j + frameHalfSize]);
+				var a = frame[j];
+				var b = frame[j + frameHalfSize];
+				spectrum[j] = a + b;
+				spectrum[j + frameHalfSize] = omega * (a - b);
 				omega *= omegaPowBase;
 			}
 
@@ -86,8 +98,8 @@ namespace Rainbow
 				yBottom[i] = spectrum[i + frameHalfSize];
 			}
 
-			var spectrumTop = DecimationInFrequency(yTop, direct);
-			var spectrumBottom = DecimationInFrequency(yBottom, direct);
+			var spectrumTop = _DecimationInFrequency(yTop, direct);
+			var spectrumBottom = _DecimationInFrequency(yBottom, direct);
 			for (var i = 0; i < frameHalfSize; i++)
 			{
 				var j = i << 1; // i = 2*j;
