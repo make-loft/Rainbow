@@ -54,6 +54,7 @@ namespace Rainbow
 
 		public static explicit operator Complex(decimal value) => new Complex((double) value);
 
+		public static Complex operator +(Complex value) => new Complex(+value.Real, +value.Imaginary);
 		public static Complex operator -(Complex value) => new Complex(-value.Real, -value.Imaginary);
 
 		public static Complex operator +(Complex left, Complex right) => new Complex(
