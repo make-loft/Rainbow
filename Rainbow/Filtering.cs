@@ -28,7 +28,7 @@ namespace Rainbow
 				var binDelta = omegaDelta / (DoublePi * binToFrequancy);
 				var frequancyActual = (bin + binDelta) * binToFrequancy;
 				var magnitude = spectrum1[bin].Magnitude + spectrum0[bin].Magnitude;
-				var item = new Complex(frequancyActual, magnitude *(0.5 + Math.Abs(binDelta)));
+				var item = new Complex(frequancyActual, magnitude * (0.5 + Math.Abs(binDelta)));
 				items.Add(item);
 			}
 
@@ -45,41 +45,53 @@ namespace Rainbow
 			return angle;
 		}
 
-		private static void Calculate(IList<Complex> data, int i, int j,
-			out double x0, out double y0,
-			out double x1, out double y1,
-			out double a, out double b)
+		private static void Deconstruct(this Complex value, out double real, out double imaginary)
 		{
-			x0 = data[i].Real;
-			y0 = data[i].Imaginary;
-			x1 = data[j].Real;
-			y1 = data[j].Imaginary;
-
-			a = (y1 - y0) / (x1 - x0);
-			b = y0 - a * x0;
+			real = value.Real;
+			imaginary = value.Imaginary;
 		}
 
-		public static List<Complex> Antialiasing(List<Complex> data)
+		public static List<Complex> Correct(this List<Complex> data)
 		{
-			var result = new List<Complex>();
-			for (var i = 0; i < data.Count - 4; i++)
+			var correctedValues = new List<Complex>();
+			var halfStep = (data[1].Real - data[0].Real) / 2;
+			var count = data.Count - 4;
+			for (var i = 0; i < count; i++)
 			{
-				Calculate(data, i + 0, i + 1, out var xa, out var ya, out var xb, out var yb, out var a, out var b);
-				Calculate(data, i + 2, i + 3, out var xc, out var yc, out var xd, out var yd, out var c, out var d);
-
-				var x = (d - b) / (a - c);
-				var y = (a * d - b * c) / (a - c);
+				data[i + 0].Deconstruct(out var ax, out var ay);
+				data[i + 1].Deconstruct(out var bx, out var by);
+				data[i + 2].Deconstruct(out var cx, out var cy);
+				data[i + 3].Deconstruct(out var dx, out var dy);
 
 				var applyCorrection =
-					y > ya && y > yb && y > yc && y > yd &&
-					x > xa && x > xb && x < xc && x < xd;
+					ay < by && ay < cy && dy < by && dy < cy;
 
 				if (applyCorrection)
-					result.Add(new Complex(x, y));
-				else result.Add(new Complex(xb, yb));
+				{
+					var middle = (bx + cx) / 2;
+					var delta = halfStep * (cy - by) / (by + cy);
+					var mx = middle + delta;
+					var my = (by + cy);
+
+					var lx = ax + (mx - bx);
+					var rx = dx + (mx - cx);
+
+					var ly = ay * (cx - mx) / halfStep;
+					var ry = dy * (mx - bx) / halfStep;
+
+					correctedValues.Add(new Complex(lx, ly));
+					correctedValues.Add(new Complex(mx, my));
+					correctedValues.Add(new Complex(rx, ry));
+
+					i += 3;
+				}
+				else
+				{
+					correctedValues.Add(new Complex(ax, ay));
+				}
 			}
 
-			return result;
+			return correctedValues;
 		}
 	}
 }
