@@ -10,7 +10,7 @@ namespace Rainbow
 		public const double SinglePi = Math.PI;
 		public const double DoublePi = 2 * Math.PI;
 
-		public static Dictionary<double, double> GetJoinedSpectrum(
+		public static List<Complex> GetJoinedSpectrum(
 			IList<Complex> spectrum0, IList<Complex> spectrum1,
 			double shiftsPerFrame, double sampleRate)
 		{
@@ -18,7 +18,7 @@ namespace Rainbow
 			var frameTime = frameSize / sampleRate;
 			var shiftTime = frameTime / shiftsPerFrame;
 			var binToFrequancy = sampleRate / frameSize;
-			var dictionary = new Dictionary<double, double>();
+			var items = new List<Complex>();
 
 			for (var bin = 0; bin < frameSize; bin++)
 			{
@@ -28,10 +28,11 @@ namespace Rainbow
 				var binDelta = omegaDelta / (DoublePi * binToFrequancy);
 				var frequancyActual = (bin + binDelta) * binToFrequancy;
 				var magnitude = spectrum1[bin].Magnitude + spectrum0[bin].Magnitude;
-				dictionary.Add(frequancyActual, magnitude * (0.5 + Math.Abs(binDelta)));
+				var item = new Complex(frequancyActual, magnitude *(0.5 + Math.Abs(binDelta)));
+				items.Add(item);
 			}
 
-			return dictionary;
+			return items;
 		}
 
 		public static int InvertSign(this int d, bool negate) => negate ? -d : +d;
@@ -44,25 +45,24 @@ namespace Rainbow
 			return angle;
 		}
 
-		private static void Calculate(IList<KeyValuePair<double, double>> data, int i, int j,
+		private static void Calculate(IList<Complex> data, int i, int j,
 			out double x0, out double y0,
 			out double x1, out double y1,
 			out double a, out double b)
 		{
-			x0 = data[i].Key;
-			y0 = data[i].Value;
-			x1 = data[j].Key;
-			y1 = data[j].Value;
+			x0 = data[i].Real;
+			y0 = data[i].Imaginary;
+			x1 = data[j].Real;
+			y1 = data[j].Imaginary;
 
 			a = (y1 - y0) / (x1 - x0);
 			b = y0 - a * x0;
 		}
 
-		public static Dictionary<double, double> Antialiasing(Dictionary<double, double> spectrum)
+		public static List<Complex> Antialiasing(List<Complex> data)
 		{
-			var data = spectrum.ToArray();
-			var result = new Dictionary<double, double>();
-			for (var i = 0; i < data.Length - 4; i++)
+			var result = new List<Complex>();
+			for (var i = 0; i < data.Count - 4; i++)
 			{
 				Calculate(data, i + 0, i + 1, out var xa, out var ya, out var xb, out var yb, out var a, out var b);
 				Calculate(data, i + 2, i + 3, out var xc, out var yc, out var xd, out var yd, out var c, out var d);
@@ -70,13 +70,13 @@ namespace Rainbow
 				var x = (d - b) / (a - c);
 				var y = (a * d - b * c) / (a - c);
 
-				result.Add(xb, yb);
+				var applyCorrection =
+					y > ya && y > yb && y > yc && y > yd &&
+					x > xa && x > xb && x < xc && x < xd;
 
-				if (y > ya && y > yb && y > yc && y > yd &&
-					x > xa && x > xb && x < xc && x < xd)
-				{
-					result.Add(x, y);
-				}
+				if (applyCorrection)
+					result.Add(new Complex(x, y));
+				else result.Add(new Complex(xb, yb));
 			}
 
 			return result;
