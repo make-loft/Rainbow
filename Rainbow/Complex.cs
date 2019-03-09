@@ -25,7 +25,13 @@ namespace Rainbow
 			Imaginary = imaginary;
 		}
 
-        public double Real { get; }
+		public void Deconstruct(out double real, out double imaginary)
+		{
+			real = Real;
+			imaginary = Imaginary;
+		}
+
+		public double Real { get; }
         public double Imaginary { get; }
         public double Magnitude => Abs(this);
 		public double Phase => Math.Atan2(Imaginary, Real);
@@ -37,7 +43,7 @@ namespace Rainbow
 		
 		public bool Equals(Complex value) => Is(value);
 		public override bool Equals(object obj) => Is(obj);
-		
+
 		public static bool operator ==(Complex left, Complex right) => left.Is(right);
 		public static bool operator !=(Complex left, Complex right) => left.IsNot(right);
 
