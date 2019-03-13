@@ -27,8 +27,26 @@ namespace Rainbow
 				var omegaDelta = Align(omegaActual - omegaExpected, DoublePi); // Δω=(∂ω + π)%2π - π
 				var binDelta = omegaDelta / (DoublePi * binToFrequancy);
 				var frequancyActual = (bin + binDelta) * binToFrequancy;
-				var magnitude = spectrum1[bin].Magnitude + spectrum0[bin].Magnitude;
+				var magnitude = (spectrum1[bin].Magnitude + spectrum0[bin].Magnitude) / 2d;
 				var item = new Complex(frequancyActual, magnitude * (0.5 + Math.Abs(binDelta)));
+				items.Add(item);
+			}
+
+			return items;
+		}
+
+
+		public static List<Complex> GetSpectrum(IList<Complex> spectrum, double sampleRate)
+		{
+			var frameSize = spectrum.Count;
+			var binToFrequancy = sampleRate / frameSize;
+			var items = new List<Complex>();
+
+			for (var bin = 0; bin < frameSize; bin++)
+			{
+				var frequancyActual = bin * binToFrequancy;
+				var magnitude = spectrum[bin].Magnitude;
+				var item = new Complex(frequancyActual, magnitude);
 				items.Add(item);
 			}
 
@@ -43,12 +61,6 @@ namespace Rainbow
 			qpd += (qpd & 1).InvertSign(qpd < 0);
 			angle -= period * qpd;
 			return angle;
-		}
-
-		private static void Deconstruct(this Complex value, out double real, out double imaginary)
-		{
-			real = value.Real;
-			imaginary = value.Imaginary;
 		}
 
 		public static List<Complex> Correct(this List<Complex> data)
@@ -69,9 +81,10 @@ namespace Rainbow
 				if (applyCorrection)
 				{
 					var middle = (bx + cx) / 2;
+					//var delta = halfStep * (cy - by + dy - ay) / (by + cy + ay + dy);
 					var delta = halfStep * (cy - by) / (by + cy);
 					var mx = middle + delta;
-					var my = (by + cy);
+					var my = by + cy - (ay + dy);
 
 					var lx = ax + (mx - bx);
 					var rx = dx + (mx - cx);
