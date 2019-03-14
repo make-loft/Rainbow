@@ -73,8 +73,7 @@ namespace Rainbow
 				data[i + 3].Deconstruct(out var dx, out var dy);
 
 				var applyCorrection =
-					//ay < by && dy < cy;
-				ay < by && ay < cy && dy < by && dy < cy;
+					ay < by && ay < cy && dy * 0.9 < by && dy < cy;
 
 				if (applyCorrection)
 				{
