@@ -6,9 +6,6 @@ namespace Rainbow
 {
 	public static class Butterfly
 	{
-		public const double SinglePi = Math.PI;
-		public const double DoublePi = 2 * Math.PI;
-
 		public static Complex[] Normalize(this Complex[] frame)
 		{
 			var size = frame.Length;
@@ -53,7 +50,7 @@ namespace Rainbow
 			var spectrumOdd = _DecimationInTime(frameOdd, direct);
 			var spectrumEven = _DecimationInTime(frameEven, direct);
 
-			var arg = (DoublePi / frameFullSize).InvertSign(direct);
+			var arg = (Pi.Double / frameFullSize).InvertSign(direct);
 			var omegaPowBase = new Complex(Math.Cos(arg), Math.Sin(arg));
 			var omega = Complex.One;
 			var spectrum = frame; // new Complex[frameFullSize];
@@ -76,7 +73,7 @@ namespace Rainbow
 			var frameHalfSize = frame.Length >> 1; // frame.Length/2
 			var frameFullSize = frame.Length;
 
-			var arg = (DoublePi / frameFullSize).InvertSign(direct);
+			var arg = (Pi.Double / frameFullSize).InvertSign(direct);
 			var omegaPowBase = new Complex(Math.Cos(arg), Math.Sin(arg));
 			var omega = Complex.One;
 			var spectrum = frame; // new Complex[frameFullSize];

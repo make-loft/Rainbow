@@ -7,9 +7,6 @@ namespace Rainbow
 	//  Δ∂ωπ
 	public static class Filtering
 	{
-		public const double SinglePi = Math.PI;
-		public const double DoublePi = 2 * Math.PI;
-
 		public static List<Complex> GetJoinedSpectrum(
 			IList<Complex> spectrum0, IList<Complex> spectrum1,
 			double shiftsPerFrame, double sampleRate)
@@ -22,10 +19,10 @@ namespace Rainbow
 
 			for (var bin = 0; bin < frameSize; bin++)
 			{
-				var omegaExpected = DoublePi * (bin * binToFrequancy); // ω=2πf
+				var omegaExpected = Pi.Double * (bin * binToFrequancy); // ω=2πf
 				var omegaActual = (spectrum1[bin].Phase - spectrum0[bin].Phase) / shiftTime; // ω=∂φ/∂t
-				var omegaDelta = Align(omegaActual - omegaExpected, DoublePi); // Δω=(∂ω + π)%2π - π
-				var binDelta = omegaDelta / (DoublePi * binToFrequancy);
+				var omegaDelta = Align(omegaActual - omegaExpected, Pi.Double); // Δω=(∂ω + π)%2π - π
+				var binDelta = omegaDelta / (Pi.Double * binToFrequancy);
 				var frequancyActual = (bin + binDelta) * binToFrequancy;
 				var magnitude = (spectrum1[bin].Magnitude + spectrum0[bin].Magnitude) / 2d;
 				var item = new Complex(frequancyActual, magnitude * (0.5 + Math.Abs(binDelta)));
@@ -76,21 +73,30 @@ namespace Rainbow
 				data[i + 3].Deconstruct(out var dx, out var dy);
 
 				var applyCorrection =
-					ay < by && ay < cy && dy < by && dy < cy;
+					//ay < by && dy < cy;
+				ay < by && ay < cy && dy < by && dy < cy;
 
 				if (applyCorrection)
 				{
 					var middle = (bx + cx) / 2;
-					//var delta = halfStep * (cy - by + dy - ay) / (by + cy + ay + dy);
-					var delta = halfStep * (cy - by) / (by + cy);
-					var mx = middle + delta;
-					var my = by + cy - (ay + dy);
+
+					var d0 = cy - by;
+					var s0 = cy + by;
+					var d1 = dy - ay;
+					var s1 = dy + ay;
+					var delta = d0 / s0;
+					var delta1 = d1 / s1;
+					//var delta = (cy - by - dy + ay) / (by + cy - ay - dy);
+					//var delta0 = (cy - by) / (by + cy);
+					//var delta1 = (dy - ay) / (dy + cy);
+					var mx = middle + delta * halfStep;
+					var my = (by + cy) - (ay + dy) / Pi.Half;
 
 					var lx = ax + (mx - bx);
 					var rx = dx + (mx - cx);
 
-					var ly = ay * (cx - mx) / halfStep;
-					var ry = dy * (mx - bx) / halfStep;
+					var ly = ay; //* (cx - mx) / halfStep;
+					var ry = dy; //* (mx - bx) / halfStep;
 
 					correctedValues.Add(new Complex(lx, ly));
 					correctedValues.Add(new Complex(mx, my));
