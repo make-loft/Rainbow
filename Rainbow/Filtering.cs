@@ -16,8 +16,9 @@ namespace Rainbow
 			var shiftTime = frameTime / shiftsPerFrame;
 			var binToFrequancy = sampleRate / frameSize;
 			var items = new List<Complex>();
+			var binsCount = frameSize / 2;
 
-			for (var bin = 0; bin < frameSize; bin++)
+			for (var bin = 0; bin < binsCount; bin++)
 			{
 				var omegaExpected = Pi.Double * (bin * binToFrequancy); // ω=2πf
 				var omegaActual = (spectrum1[bin].Phase - spectrum0[bin].Phase) / shiftTime; // ω=∂φ/∂t
@@ -38,8 +39,9 @@ namespace Rainbow
 			var frameSize = spectrum.Count;
 			var binToFrequancy = sampleRate / frameSize;
 			var items = new List<Complex>();
+			var binsCount = frameSize / 2;
 
-			for (var bin = 0; bin < frameSize; bin++)
+			for (var bin = 0; bin < binsCount; bin++)
 			{
 				var frequancyActual = bin * binToFrequancy;
 				var magnitude = spectrum[bin].Magnitude;
@@ -72,22 +74,22 @@ namespace Rainbow
 				data[i + 2].Deconstruct(out var cx, out var cy);
 				data[i + 3].Deconstruct(out var dx, out var dy);
 
+				var magicFactor = bx / dx; /* for better accuracy, but why? */
 				var applyCorrection =
-					ay < by && ay < cy && dy * 0.9 < by && dy < cy;
+					ay < cy && ay < by &&
+					dy < cy && dy * magicFactor < by;
 
 				if (applyCorrection)
 				{
 					var middle = (bx + cx) / 2;
 
-					var d0 = cy - by;
-					var s0 = cy + by;
-					var d1 = dy - ay;
-					var s1 = dy + ay;
-					var delta = d0 / s0;
-					var delta1 = d1 / s1;
-					//var delta = (cy - by - dy + ay) / (by + cy - ay - dy);
-					//var delta0 = (cy - by) / (by + cy);
-					//var delta1 = (dy - ay) / (dy + cy);
+					//var d0 = cy - by;
+					//var s0 = cy + by;
+					//var d1 = dy - ay;
+					//var s1 = dy + ay;
+					//var delta = d0 / s0;
+					//var delta1 = d1 / s1;
+					var delta = (cy - by) / (cy + by);
 					var mx = middle + delta * halfStep;
 					var my = (by + cy) - (ay + dy) / Pi.Half;
 
