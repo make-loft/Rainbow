@@ -2,6 +2,8 @@
 
 namespace Rainbow
 {
+	public delegate double ApodizationFunc(double binIndex, double frameSize);
+
 	public class Windowing
 	{
 		private const double Q = 0.5;
