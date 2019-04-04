@@ -33,6 +33,23 @@ namespace Rainbow
 			return items;
 		}
 
+		public static List<Complex> GetPhaseSpectrum(IList<Complex> spectrum, double sampleRate)
+		{
+			var frameSize = spectrum.Count;
+			var binToFrequancy = sampleRate / frameSize;
+			var items = new List<Complex>();
+			var binsCount = frameSize;
+
+			for (var bin = 0; bin < binsCount; bin++)
+			{
+				var frequancyActual = bin * binToFrequancy;
+				var magnitude = spectrum[bin].Phase;
+				var item = new Complex(frequancyActual, magnitude);
+				items.Add(item);
+			}
+
+			return items;
+		}
 
 		public static List<Complex> GetSpectrum(IList<Complex> spectrum, double sampleRate)
 		{
