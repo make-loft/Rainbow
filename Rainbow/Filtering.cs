@@ -6,20 +6,20 @@ namespace Rainbow
 {
 	public struct Bin
 	{
-		public double Frequancy { get; set; }
+		public double Frequency { get; set; }
 		public double Magnitude { get; set; }
 		public double Phase { get; set; }
 
-		public void Construct(ref double frequancy, ref double magnitude, ref double phase)
+		public void Construct(ref double frequency, ref double magnitude, ref double phase)
 		{
-			Frequancy = frequancy;
+			Frequency = frequency;
 			Magnitude = magnitude;
 			Phase = phase;
 		}
 
-		public void Deconstruct(out double frequancy, out double magnitude, out double phase)
+		public void Deconstruct(out double frequency, out double magnitude, out double phase)
 		{
-			frequancy = Frequancy;
+			frequency = Frequency;
 			magnitude = Magnitude;
 			phase = Phase;
 		}
@@ -35,19 +35,19 @@ namespace Rainbow
 			var frameSize = spectrum0.Count;
 			var frameTime = frameSize / sampleRate;
 			var shiftTime = frameTime / shiftsPerFrame;
-			var binToFrequancy = sampleRate / frameSize;
+			var binToFrequency = sampleRate / frameSize;
 			var items = new List<Complex>();
 			var binsCount = frameSize / 2;
 
 			for (var bin = 0; bin < binsCount; bin++)
 			{
-				var omegaExpected = Pi.Double * (bin * binToFrequancy); // ω=2πf
+				var omegaExpected = Pi.Double * (bin * binToFrequency); // ω=2πf
 				var omegaActual = (spectrum1[bin].Phase - spectrum0[bin].Phase) / shiftTime; // ω=∂φ/∂t
 				var omegaDelta = Align(omegaActual - omegaExpected, Pi.Double); // Δω=(∂ω + π)%2π - π
-				var binDelta = omegaDelta / (Pi.Double * binToFrequancy);
-				var frequancyActual = (bin + binDelta) * binToFrequancy;
+				var binDelta = omegaDelta / (Pi.Double * binToFrequency);
+				var frequencyActual = (bin + binDelta) * binToFrequency;
 				var magnitude = (spectrum1[bin].Magnitude + spectrum0[bin].Magnitude) / 2d;
-				var item = new Complex(frequancyActual, magnitude * (0.5 + Math.Abs(binDelta)));
+				var item = new Complex(frequencyActual, magnitude * (0.5 + Math.Abs(binDelta)));
 				items.Add(item);
 			}
 
@@ -57,7 +57,7 @@ namespace Rainbow
 		public static IEnumerable<Bin> GetSpectrum(IList<Complex> spectrum, double sampleRate)
 		{
 			var frameSize = spectrum.Count;
-			var binToFrequancyFactor = sampleRate / frameSize;
+			var binToFrequencyFactor = sampleRate / frameSize;
 
 			for (var bin = 0; bin < frameSize; bin++)
 			{
@@ -65,7 +65,7 @@ namespace Rainbow
 				{
 					Phase = spectrum[bin].Phase,
 					Magnitude = spectrum[bin].Magnitude,
-					Frequancy = bin * binToFrequancyFactor
+					Frequency = bin * binToFrequencyFactor
 				};
 			}
 		}
@@ -82,7 +82,7 @@ namespace Rainbow
 
 		public static IEnumerable<Bin> Correct(this IList<Bin> data)
 		{
-			var halfStep = (data[1].Frequancy - data[0].Frequancy) / 2;
+			var halfStep = (data[1].Frequency - data[0].Frequency) / 2;
 			var count = data.Count / 2 - 4;
 			for (var i = 0; i < count; i++)
 			{
