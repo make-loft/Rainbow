@@ -4,6 +4,27 @@ using System.Linq;
 
 namespace Rainbow
 {
+	public struct Bin
+	{
+		public double Frequancy { get; set; }
+		public double Magnitude { get; set; }
+		public double Phase { get; set; }
+
+		public void Construct(ref double frequancy, ref double magnitude, ref double phase)
+		{
+			Frequancy = frequancy;
+			Magnitude = magnitude;
+			Phase = phase;
+		}
+
+		public void Deconstruct(out double frequancy, out double magnitude, out double phase)
+		{
+			frequancy = Frequancy;
+			magnitude = Magnitude;
+			phase = Phase;
+		}
+	}
+
 	//  Δ∂ωπ
 	public static class Filtering
 	{
@@ -33,40 +54,20 @@ namespace Rainbow
 			return items;
 		}
 
-		public static List<Complex> GetPhaseSpectrum(IList<Complex> spectrum, double sampleRate)
+		public static IEnumerable<Bin> GetSpectrum(IList<Complex> spectrum, double sampleRate)
 		{
 			var frameSize = spectrum.Count;
-			var binToFrequancy = sampleRate / frameSize;
-			var items = new List<Complex>();
-			var binsCount = frameSize;
+			var binToFrequancyFactor = sampleRate / frameSize;
 
-			for (var bin = 0; bin < binsCount; bin++)
+			for (var bin = 0; bin < frameSize; bin++)
 			{
-				var frequancyActual = bin * binToFrequancy;
-				var magnitude = spectrum[bin].Phase;
-				var item = new Complex(frequancyActual, magnitude);
-				items.Add(item);
+				yield return new Bin
+				{
+					Phase = spectrum[bin].Phase,
+					Magnitude = spectrum[bin].Magnitude,
+					Frequancy = bin * binToFrequancyFactor
+				};
 			}
-
-			return items;
-		}
-
-		public static List<Complex> GetSpectrum(IList<Complex> spectrum, double sampleRate)
-		{
-			var frameSize = spectrum.Count;
-			var binToFrequancy = sampleRate / frameSize;
-			var items = new List<Complex>();
-			var binsCount = frameSize;
-
-			for (var bin = 0; bin < binsCount; bin++)
-			{
-				var frequancyActual = bin * binToFrequancy;
-				var magnitude = spectrum[bin].Magnitude;
-				var item = new Complex(frequancyActual, magnitude);
-				items.Add(item);
-			}
-
-			return items;
 		}
 
 		public static int InvertSign(this int d, bool negate) => negate ? -d : +d;
@@ -79,18 +80,17 @@ namespace Rainbow
 			return angle;
 		}
 
-		public static List<Complex> Correct(this List<Complex> data)
+		public static IEnumerable<Bin> Correct(this IList<Bin> data)
 		{
-			var correctedValues = new List<Complex>();
-			var halfStep = (data[1].Real - data[0].Real) / 2;
+			var halfStep = (data[1].Frequancy - data[0].Frequancy) / 2;
 			var count = data.Count / 2 - 4;
 			for (var i = 0; i < count; i++)
 			{
 				//var x = i < 0 ? count / 2 : 0;
-				data[i + 0].Deconstruct(out var ax, out var ay);
-				data[i + 1].Deconstruct(out var bx, out var by);
-				data[i + 2].Deconstruct(out var cx, out var cy);
-				data[i + 3].Deconstruct(out var dx, out var dy);
+				data[i + 0].Deconstruct(out var ax, out var ay, out var ap);
+				data[i + 1].Deconstruct(out var bx, out var by, out var bp);
+				data[i + 2].Deconstruct(out var cx, out var cy, out var cp);
+				data[i + 3].Deconstruct(out var dx, out var dy, out var dp);
 				//ax = i < 0 ? bx - cx : ax;
 
 				var magicFactor = cx / dx; /* for better accuracy, but why? */
@@ -118,19 +118,26 @@ namespace Rainbow
 					var ly = ay; //* (cx - mx) / halfStep;
 					var ry = dy; //* (mx - bx) / halfStep;
 
-					correctedValues.Add(new Complex(lx, ly));
-					correctedValues.Add(new Complex(mx, my));
-					correctedValues.Add(new Complex(rx, ry));
+					Bin a = new Bin();
+					Bin b = new Bin();
+					Bin c = new Bin();
+					a.Construct(ref lx, ref ly, ref ap);
+					b.Construct(ref mx, ref my, ref bp);
+					c.Construct(ref rx, ref ry, ref cp);
+
+					yield return a;
+					yield return b;
+					yield return c;
 
 					i += 3;
 				}
 				else
 				{
-					correctedValues.Add(new Complex(ax, ay));
+					Bin a = new Bin();
+					a.Construct(ref ax, ref ay, ref ap);
+					yield return a;
 				}
 			}
-
-			return correctedValues;
 		}
 	}
 }
