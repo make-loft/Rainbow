@@ -10,7 +10,7 @@ namespace Rainbow
 		public double Magnitude { get; set; }
 		public double Phase { get; set; }
 
-		public void Construct(ref double frequency, ref double magnitude, ref double phase)
+		public void Construct(in double frequency, in double magnitude, in double phase)
 		{
 			Frequency = frequency;
 			Magnitude = magnitude;
@@ -121,9 +121,9 @@ namespace Rainbow
 					Bin a = new Bin();
 					Bin b = new Bin();
 					Bin c = new Bin();
-					a.Construct(ref lx, ref ly, ref ap);
-					b.Construct(ref mx, ref my, ref bp);
-					c.Construct(ref rx, ref ry, ref cp);
+					a.Construct(in lx, in ly, in ap);
+					b.Construct(in mx, in my, in bp);
+					c.Construct(in rx, in ry, in cp);
 
 					yield return a;
 					yield return b;
@@ -134,7 +134,7 @@ namespace Rainbow
 				else
 				{
 					Bin a = new Bin();
-					a.Construct(ref ax, ref ay, ref ap);
+					a.Construct(in ax, in ay, in ap);
 					yield return a;
 				}
 			}
