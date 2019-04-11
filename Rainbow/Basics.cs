@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Rainbow
@@ -22,5 +23,7 @@ namespace Rainbow
 
 		public static IEnumerable<double> Stretch(this IEnumerable<double> values, double factor) => values.Select(v => v.Stretch(factor));
 		public static IEnumerable<double> Squeeze(this IEnumerable<double> values, double factor) => values.Select(v => v.Squeeze(factor));
+
+		public static double Scale(this double value, ScaleFunc scaleFunc) => scaleFunc is null ? value : scaleFunc(value);
 	}
 }
