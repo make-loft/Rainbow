@@ -25,5 +25,9 @@ namespace Rainbow
 		public static IEnumerable<double> Squeeze(this IEnumerable<double> values, double factor) => values.Select(v => v.Squeeze(factor));
 
 		public static double Scale(this double value, ScaleFunc scaleFunc) => scaleFunc is null ? value : scaleFunc(value);
+		public static double Abs(this in double value) => value > -0 ? +value : -value;
+		public static double Mod(this in double value, in double module = +1d) => value % module;
+		public static double Truncate(this in double value, in double module = +1d) => value - value % module;
+		public static double InvertSign(this in double d, bool negate) => negate ? -d : +d;
 	}
 }

@@ -24,8 +24,6 @@ namespace Rainbow
 		//	return new Complex(Math.Cos(arg), Math.Sin(arg));
 		//}
 
-		public static double InvertSign(this double d, bool negate) => negate ? -d : +d;
-
 		public static Complex[] DecimationInTime(this IEnumerable<Complex> frame, bool direct) =>
 			frame.ToArray()._DecimationInTime(direct);
 
