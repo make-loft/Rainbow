@@ -7,6 +7,7 @@ namespace Rainbow
 	public static class ScaleFuncs
 	{
 		public static double Lineal(double value) => value;
+
 		public static double _20Log10(double value) =>
 			value > 0d ? +20d * Math.Log(+value, 10d) :
 			value < 0d ? -20d * Math.Log(-value, 10d) :
