@@ -80,17 +80,17 @@ namespace Rainbow
 			return angle;
 		}
 
-		public static IEnumerable<Bin> Correct(this IList<Bin> data)
+		public static IEnumerable<Bin> Interpolate(this IList<Bin> spectrum)
 		{
-			var halfStep = (data[1].Frequency - data[0].Frequency) / 2;
-			var count = data.Count / 2 - 4;
+			var halfStep = (spectrum[1].Frequency - spectrum[0].Frequency) / 2;
+			var count = spectrum.Count / 2 - 4;
 			for (var i = 0; i < count; i++)
 			{
 				//var x = i < 0 ? count / 2 : 0;
-				data[i + 0].Deconstruct(out var ax, out var ay, out var ap);
-				data[i + 1].Deconstruct(out var bx, out var by, out var bp);
-				data[i + 2].Deconstruct(out var cx, out var cy, out var cp);
-				data[i + 3].Deconstruct(out var dx, out var dy, out var dp);
+				spectrum[i + 0].Deconstruct(out var ax, out var ay, out var ap);
+				spectrum[i + 1].Deconstruct(out var bx, out var by, out var bp);
+				spectrum[i + 2].Deconstruct(out var cx, out var cy, out var cp);
+				spectrum[i + 3].Deconstruct(out var dx, out var dy, out var dp);
 				//ax = i < 0 ? bx - cx : ax;
 
 				var magicFactor = cx / dx; /* for better accuracy, but why? */
