@@ -9,28 +9,27 @@ namespace Rainbow
 		public static Complex[] Normalize(this Complex[] frame)
 		{
 			var size = frame.Length;
-			for (var i = 0; i < size; i++)
-			{
-				frame[i] /= size;
-			}
-
+			for (var i = 0; i < size; i++) frame[i] /= size;
 			return frame;
 		}
 
-		//private static Complex Omega(int i, int sampleRate)
-		//{
-		//	if (i%sampleRate == 0) return Complex.One;
-		//	var arg = -DoublePi*i/sampleRate;
-		//	return new Complex(Math.Cos(arg), Math.Sin(arg));
-		//}
+		public static Complex[] Decimation(this IEnumerable<Complex> frame, bool direct, bool inTime = true)
+		{
+			var f = direct
+				? frame.ToArray()
+				: frame.ToArray().Normalize();
 
-		public static Complex[] DecimationInTime(this IEnumerable<Complex> frame, bool direct) =>
-			frame.ToArray()._DecimationInTime(direct);
+			var spectrum = inTime
+				? f.DecimationInTime(direct)
+				: f.DecimationInFrequency(direct);
 
-		public static Complex[] _DecimationInFrequency(this IEnumerable<Complex> frame, bool direct) =>
-			frame.ToArray()._DecimationInFrequency(direct);
+			var size = spectrum.Length;
+			var factor = direct ? 2d : 0.5d;
+			for (var i = 0; i < size; i++) spectrum[i] *= factor;
+			return spectrum;
+		}
 
-		private static Complex[] _DecimationInTime(this Complex[] frame, bool direct)
+		private static Complex[] DecimationInTime(this Complex[] frame, bool direct)
 		{
 			if (frame.Length == 1) return frame;
 			var frameHalfSize = frame.Length >> 1; // frame.Length/2
@@ -45,8 +44,8 @@ namespace Rainbow
 				frameEven[i] = frame[j];
 			}
 
-			var spectrumOdd = _DecimationInTime(frameOdd, direct);
-			var spectrumEven = _DecimationInTime(frameEven, direct);
+			var spectrumOdd = DecimationInTime(frameOdd, direct);
+			var spectrumEven = DecimationInTime(frameEven, direct);
 
 			var arg = (Pi.Double / frameFullSize).InvertSign(direct);
 			var omegaPowBase = new Complex(Math.Cos(arg), Math.Sin(arg));
@@ -65,7 +64,7 @@ namespace Rainbow
 			return spectrum;
 		}
 
-		private static Complex[] _DecimationInFrequency(this Complex[] frame, bool direct)
+		private static Complex[] DecimationInFrequency(this Complex[] frame, bool direct)
 		{
 			if (frame.Length == 1) return frame;
 			var frameHalfSize = frame.Length >> 1; // frame.Length/2
@@ -93,8 +92,8 @@ namespace Rainbow
 				yBottom[i] = spectrum[i + frameHalfSize];
 			}
 
-			var spectrumTop = _DecimationInFrequency(yTop, direct);
-			var spectrumBottom = _DecimationInFrequency(yBottom, direct);
+			var spectrumTop = DecimationInFrequency(yTop, direct);
+			var spectrumBottom = DecimationInFrequency(yBottom, direct);
 			for (var i = 0; i < frameHalfSize; i++)
 			{
 				var j = i << 1; // i = 2*j;
