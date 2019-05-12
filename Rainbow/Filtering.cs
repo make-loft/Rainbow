@@ -88,7 +88,7 @@ namespace Rainbow
 				spectrum[i + 0].Deconstruct(out var ax, out var ay, out var ap);
 				spectrum[i + 1].Deconstruct(out var bx, out var by, out var bp);
 				spectrum[i + 2].Deconstruct(out var cx, out var cy, out var cp);
-				if (ay < by && by > cy) yield return spectrum[i + 1];
+				if ((ay + cy) * 2d < by) yield return spectrum[i + 1];
 			}
 		}
 
