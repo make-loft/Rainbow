@@ -9,8 +9,8 @@ namespace Rainbow
 		public static double Lineal(double value) => value;
 
 		public static double _20Log10(double value) =>
-			value > 0d ? +20d * Math.Log(+value, 10d) :
-			value < 0d ? -20d * Math.Log(-value, 10d) :
+			value > 0d ? +20d * Math.Log(+value * ushort.MaxValue, 10d) :
+			value < 0d ? -20d * Math.Log(-value * ushort.MaxValue, 10d) :
 			0d;
 
 		public static double Log2(double value) =>
@@ -26,6 +26,11 @@ namespace Rainbow
 		public static double Exp(double value) =>
 			value > 0d ? +Math.Exp(+value) :
 			value < 0d ? -Math.Exp(-value) :
+			0d;
+
+		public static double Sqrt(double value) =>
+			value > 0d ? +Math.Sqrt(+value) :
+			value < 0d ? -Math.Sqrt(-value) :
 			0d;
 	}
 }
