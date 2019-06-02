@@ -10,6 +10,13 @@ namespace Rainbow
 		public double Magnitude { get; set; }
 		public double Phase { get; set; }
 
+		public Bin(in double frequency, in double magnitude, in double phase)
+		{
+			Frequency = frequency;
+			Magnitude = magnitude;
+			Phase = phase;
+		}
+
 		public void Construct(in double frequency, in double magnitude, in double phase)
 		{
 			Frequency = frequency;
@@ -119,10 +126,10 @@ namespace Rainbow
 
 				if (applyCorrection)
 				{
-					var my = (by + cy) - (ay + dy) / Pi.Half;
 					var middle = (bx + cx) / 2;
 					var delta = (cy - by) / (cy + by);
 					var mx = middle + delta * halfStep;
+					var my = (by + cy) - (ay + dy) / Pi.Half;
 
 					var lx = ax + (mx - bx);
 					var rx = dx + (mx - cx);
@@ -130,24 +137,15 @@ namespace Rainbow
 					var ly = ay; //* (cx - mx) / halfStep;
 					var ry = dy; //* (mx - bx) / halfStep;
 
-					Bin a = new Bin();
-					Bin b = new Bin();
-					Bin c = new Bin();
-					a.Construct(in lx, in ly, in ap);
-					b.Construct(in mx, in my, in bp);
-					c.Construct(in rx, in ry, in cp);
-
-					yield return a;
-					yield return b;
-					yield return c;
+					yield return new Bin(in lx, in ly, in ap);
+					yield return new Bin(in mx, in my, in bp);
+					yield return new Bin(in rx, in ry, in cp);
 
 					i += 3;
 				}
 				else
 				{
-					Bin a = new Bin();
-					a.Construct(in ax, in ay, in ap);
-					yield return a;
+					yield return new Bin(in ax, in ay, in ap);
 				}
 			}
 		}
