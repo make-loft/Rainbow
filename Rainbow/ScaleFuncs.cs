@@ -2,8 +2,6 @@
 
 namespace Rainbow
 {
-	public delegate double ScaleFunc(double value);
-
 	public static class ScaleFuncs
 	{
 		public static double Lineal(double value) => value;
