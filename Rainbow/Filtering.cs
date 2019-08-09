@@ -35,7 +35,7 @@ namespace Rainbow
 	//  Δ∂ωπ
 	public static class Filtering
 	{
-		public static List<Complex> GetJoinedSpectrum(
+		public static IEnumerable<Bin> GetJoinedSpectrum(
 			IList<Complex> spectrum0, IList<Complex> spectrum1,
 			double shiftsPerFrame, double sampleRate)
 		{
@@ -43,22 +43,18 @@ namespace Rainbow
 			var frameTime = frameSize / sampleRate;
 			var shiftTime = frameTime / shiftsPerFrame;
 			var binToFrequency = sampleRate / frameSize;
-			var items = new List<Complex>();
 			var binsCount = frameSize / 2;
 
 			for (var bin = 0; bin < binsCount; bin++)
 			{
-				var omegaExpected = Pi.Double * (bin * binToFrequency); // ω=2πf
-				var omegaActual = (spectrum1[bin].Phase - spectrum0[bin].Phase) / shiftTime; // ω=∂φ/∂t
-				var omegaDelta = Align(omegaActual - omegaExpected, Pi.Double); // Δω=(∂ω + π)%2π - π
-				var binDelta = omegaDelta / (Pi.Double * binToFrequency);
-				var frequencyActual = (bin + binDelta) * binToFrequency;
-				var magnitude = (spectrum1[bin].Magnitude + spectrum0[bin].Magnitude) / 2d;
-				var item = new Complex(frequencyActual, magnitude * (0.5 + Math.Abs(binDelta)));
-				items.Add(item);
+				var expectedFrequancy = bin * binToFrequency;
+				var expectedDeltaPhase = (Pi.Double * expectedFrequancy * shiftTime).Align(Pi.Double);
+				var actualDeltaPhase = spectrum1[bin].Phase - spectrum0[bin].Phase;
+				var correction = (actualDeltaPhase - expectedDeltaPhase) / Pi.Double;
+				var actualFrequancy = (bin + correction) * binToFrequency;
+				var magnitude = (0.5 + correction) * (spectrum1[bin].Magnitude + spectrum0[bin].Magnitude) / 2d;
+				yield return new Bin(actualFrequancy, magnitude, spectrum1[bin].Phase);
 			}
-
-			return items;
 		}
 
 		public static IEnumerable<Bin> GetSpectrum(IList<Complex> spectrum, double sampleRate)
@@ -77,14 +73,20 @@ namespace Rainbow
 			}
 		}
 
+		public static double Align(in double angle, double period)
+		{
+			var result = angle % period;
+			return result > period/2 ? result - period : result;
+		}
+
 		public static int InvertSign(this int d, bool negate) => negate ? -d : +d;
 
-		public static double Align(double angle, double period)
+		public static double Align0(in double angle, double period)
 		{
 			var qpd = (int)(angle / period);
 			qpd += (qpd & 1).InvertSign(qpd < 0);
-			angle -= period * qpd;
-			return angle;
+			var result = angle - period * qpd;
+			return result;
 		}
 
 		public static IEnumerable<Bin> EnumeratePeaks(this IList<Bin> spectrum)
