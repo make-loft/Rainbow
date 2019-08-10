@@ -40,20 +40,26 @@ namespace Rainbow
 			double shiftsPerFrame, double sampleRate)
 		{
 			var frameSize = spectrum0.Count;
-			var frameTime = frameSize / sampleRate;
-			var shiftTime = frameTime / shiftsPerFrame;
 			var binToFrequency = sampleRate / frameSize;
 			var binsCount = frameSize / 2;
+			var frameTime = frameSize / sampleRate;
+			var shiftTime = frameTime / shiftsPerFrame;
+			//var binToPhase = Pi.Double * binToFrequency * shiftTime;
+			// = Pi.Double * (sampleRate / frameSize) * (frameTime / shiftsPerFrame);
+			// = Pi.Double * (sampleRate / frameSize) * ((frameSize / sampleRate) / shiftsPerFrame);
+			var binToPhase = Pi.Double / shiftsPerFrame;
 
-			for (var bin = 0; bin < binsCount; bin++)
+			for (var binBase = 0; binBase < binsCount; binBase++)
 			{
-				var expectedFrequancy = bin * binToFrequency;
-				var expectedDeltaPhase = (Pi.Double * expectedFrequancy * shiftTime).Align(Pi.Double);
-				var actualDeltaPhase = spectrum1[bin].Phase - spectrum0[bin].Phase;
-				var correction = (actualDeltaPhase - expectedDeltaPhase) / Pi.Double;
-				var actualFrequancy = (bin + correction) * binToFrequency;
-				var magnitude = (0.5 + correction) * (spectrum1[bin].Magnitude + spectrum0[bin].Magnitude) / 2d;
-				yield return new Bin(actualFrequancy, magnitude, spectrum1[bin].Phase);
+				var actualDeltaPhase = (spectrum1[binBase].Phase - spectrum0[binBase].Phase).Align(Pi.Single);
+				var expectedDeltaPhase = (binBase * binToPhase);
+
+				var binDeviation = (actualDeltaPhase - expectedDeltaPhase).Align(Pi.Single) / binToPhase;
+
+				var r = binDeviation % 1;
+				var actualFrequancy = (binBase + r) * binToFrequency;
+				var magnitude = (spectrum1[binBase].Magnitude + spectrum0[binBase].Magnitude) / 2d;
+				yield return new Bin(actualFrequancy, magnitude, actualDeltaPhase);
 			}
 		}
 
@@ -81,7 +87,7 @@ namespace Rainbow
 
 		public static int InvertSign(this int d, bool negate) => negate ? -d : +d;
 
-		public static double Align0(in double angle, double period)
+		public static double AlignZ(in double angle, double period)
 		{
 			var qpd = (int)(angle / period);
 			qpd += (qpd & 1).InvertSign(qpd < 0);
