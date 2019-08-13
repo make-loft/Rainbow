@@ -41,13 +41,13 @@ namespace Rainbow
 		{
 			var frameSize = spectrum0.Count;
 			var binToFrequency = sampleRate / frameSize;
-			var binsCount = frameSize / 2;
-			var frameTime = frameSize / sampleRate;
-			var shiftTime = frameTime / shiftsPerFrame;
+			//var frameTime = frameSize / sampleRate;
+			//var shiftTime = frameTime / shiftsPerFrame;
 			//var binToPhase = Pi.Double * binToFrequency * shiftTime;
 			// = Pi.Double * (sampleRate / frameSize) * (frameTime / shiftsPerFrame);
 			// = Pi.Double * (sampleRate / frameSize) * ((frameSize / sampleRate) / shiftsPerFrame);
 			var binToPhase = Pi.Double / shiftsPerFrame;
+			var binsCount = frameSize / 2;
 
 			for (var binBase = 0; binBase < binsCount; binBase++)
 			{
@@ -59,7 +59,7 @@ namespace Rainbow
 				var r = binDeviation % 1;
 				var actualFrequancy = (binBase + r) * binToFrequency;
 				var magnitude = (spectrum1[binBase].Magnitude + spectrum0[binBase].Magnitude) / 2d;
-				yield return new Bin(actualFrequancy, magnitude, actualDeltaPhase);
+				yield return new Bin(actualFrequancy, magnitude * (1 + r), actualDeltaPhase);
 			}
 		}
 
@@ -79,15 +79,15 @@ namespace Rainbow
 			}
 		}
 
-		public static double Align(in double angle, double period)
+		public static double AlignL(this in double angle, double period)
 		{
 			var result = angle % period;
-			return result > period/2 ? result - period : result;
+			return result < period/2 ? result : result - period;
 		}
 
 		public static int InvertSign(this int d, bool negate) => negate ? -d : +d;
 
-		public static double AlignZ(in double angle, double period)
+		public static double AlignS(this in double angle, double period)
 		{
 			var qpd = (int)(angle / period);
 			qpd += (qpd & 1).InvertSign(qpd < 0);
