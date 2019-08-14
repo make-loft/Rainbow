@@ -51,15 +51,15 @@ namespace Rainbow
 
 			for (var binBase = 0; binBase < binsCount; binBase++)
 			{
-				var actualDeltaPhase = (spectrum1[binBase].Phase - spectrum0[binBase].Phase).Align(Pi.Single);
-				var expectedDeltaPhase = (binBase * binToPhase);
+				var actualDeltaPhase = spectrum1[binBase].Phase - spectrum0[binBase].Phase;
+				var expectedDeltaPhase = binBase * binToPhase;
 
-				var binDeviation = (actualDeltaPhase - expectedDeltaPhase).Align(Pi.Single) / binToPhase;
+				var phaseDeviation = actualDeltaPhase - expectedDeltaPhase;
+				var binDeviation = (phaseDeviation / binToPhase) % 1;
 
-				var r = binDeviation % 1;
-				var actualFrequancy = (binBase + r) * binToFrequency;
+				var actualFrequancy = (binBase + binDeviation) * binToFrequency;
 				var magnitude = (spectrum1[binBase].Magnitude + spectrum0[binBase].Magnitude) / 2d;
-				yield return new Bin(actualFrequancy, magnitude * (1 + r), actualDeltaPhase);
+				yield return new Bin(actualFrequancy, magnitude * (1 + binDeviation), actualDeltaPhase);
 			}
 		}
 
@@ -77,22 +77,6 @@ namespace Rainbow
 					Frequency = bin * binToFrequencyFactor
 				};
 			}
-		}
-
-		public static double AlignL(this in double angle, double period)
-		{
-			var result = angle % period;
-			return result < period/2 ? result : result - period;
-		}
-
-		public static int InvertSign(this int d, bool negate) => negate ? -d : +d;
-
-		public static double AlignS(this in double angle, double period)
-		{
-			var qpd = (int)(angle / period);
-			qpd += (qpd & 1).InvertSign(qpd < 0);
-			var result = angle - period * qpd;
-			return result;
 		}
 
 		public static IEnumerable<Bin> EnumeratePeaks(this IList<Bin> spectrum)
