@@ -51,8 +51,8 @@ namespace Rainbow
 
 			for (var binBase = 0; binBase < binsCount; binBase++)
 			{
-				var actualDeltaPhase = spectrum1[binBase].Phase - spectrum0[binBase].Phase;
 				var expectedDeltaPhase = binBase * binToPhase;
+				var actualDeltaPhase = spectrum1[binBase].Phase - spectrum0[binBase].Phase;
 
 				var phaseDeviation = actualDeltaPhase - expectedDeltaPhase;
 				var binDeviation = (phaseDeviation / binToPhase) % 1;
