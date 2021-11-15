@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Rainbow
 {
@@ -9,6 +8,8 @@ namespace Rainbow
 		public double Frequency { get; set; }
 		public double Magnitude { get; set; }
 		public double Phase { get; set; }
+
+		public override string ToString() => $"{Magnitude:F4} {Frequency:F4} {Phase:F4}";
 
 		public Bin(in double frequency, in double magnitude, in double phase)
 		{
@@ -79,7 +80,7 @@ namespace Rainbow
 			}
 		}
 
-		public static IEnumerable<Bin> EnumeratePeaks(this IList<Bin> spectrum)
+		public static IEnumerable<Bin> EnumeratePeaks(this IList<Bin> spectrum, double silenceThreshold = 0.01)
 		{
 			var count = spectrum.Count / 2 - 3;
 			for (var i = 0; i < count; i++)
@@ -87,7 +88,8 @@ namespace Rainbow
 				spectrum[i + 0].Deconstruct(out var ax, out var ay, out var ap);
 				spectrum[i + 1].Deconstruct(out var bx, out var by, out var bp);
 				spectrum[i + 2].Deconstruct(out var cx, out var cy, out var cp);
-				if ((ay + cy) * 2d < by) yield return spectrum[i + 1];
+				if ((ay + cy) * 0.5d < by && by > silenceThreshold)
+					yield return spectrum[i + 1];
 			}
 		}
 
@@ -105,17 +107,15 @@ namespace Rainbow
 				//ax = i < 0 ? bx - cx : ax;
 
 				var magicFactor = cx / dx; /* for better accuracy, but why? */
-				var applyCorrection =
+				var applyMagnitudeCorrection =
 					ay < by && ay < cy
 					&&
 					dy < cy && dy * magicFactor < by;
 
-				//var max0 = ay > by ? ay : by;
-				//var max1 = cy > dy ? cy : dy;
-				//var max = max0 > max1 ? max0 : max1;
-				//var my = (by + cy) - (ay + dy) / Pi.Half;
-				//var applyCorrection = my > max * magicFactor;
+				var deltaPhase = Math.Abs(bp - cp);
+				var applyPhaseCorrection = Pi.Single * 0.9 < deltaPhase && deltaPhase < Pi.Single * 1.1;
 
+				var applyCorrection = applyMagnitudeCorrection && applyPhaseCorrection;
 				if (applyCorrection)
 				{
 					var middle = (bx + cx) / 2;
@@ -129,15 +129,22 @@ namespace Rainbow
 					var ly = ay; //* (cx - mx) / halfStep;
 					var ry = dy; //* (mx - bx) / halfStep;
 
-					yield return new Bin(in lx, in ly, in ap);
-					yield return new Bin(in mx, in my, in bp);
-					yield return new Bin(in rx, in ry, in cp);
+					var x0 = bx;
+					var x1 = cx;
+					var y0 = bp; //bp < -(3 * Pi.Quarter) ? bp + Pi.Double : bp;
+					var y1 = cp; //cp > +(1 * Pi.Quarter) ? cp - Pi.Double : cp;
+
+					var mp = y0 + (mx - x0) * (y0 - y1) / (x0 - x1);
+
+					yield return new(in lx, in ly, in ap);
+					yield return new(in mx, in my, in mp);
+					yield return new(in rx, in ry, in dp);
 
 					i += 3;
 				}
 				else
 				{
-					yield return new Bin(in ax, in ay, in ap);
+					yield return new(in ax, in ay, in ap);
 				}
 			}
 		}

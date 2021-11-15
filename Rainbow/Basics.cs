@@ -11,6 +11,9 @@ namespace Rainbow
 		public static double Identity(this in double value) => +value;
 		public static double Negation(this in double value) => -value;
 
+		public static double Shift(this in double value, in double offset) => value + offset;
+		public static double Scale(this in double value, in double factor) => value * factor;
+
 		public static double Increment(this in double value, in double offset) => value + offset;
 		public static double Decrement(this in double value, in double offset) => value - offset;
 
@@ -19,6 +22,9 @@ namespace Rainbow
 
 		public static IEnumerable<double> Identity(this IEnumerable<double> values) => values.Select(v => v.Identity());
 		public static IEnumerable<double> Negation(this IEnumerable<double> values) => values.Select(v => v.Negation());
+
+		public static IEnumerable<double> Shift(this IEnumerable<double> values, double offset) => values.Select(v => v.Shift(offset));
+		public static IEnumerable<double> Scale(this IEnumerable<double> values, double offset) => values.Select(v => v.Scale(offset));
 
 		public static IEnumerable<double> Increment(this IEnumerable<double> values, double offset) => values.Select(v => v.Increment(offset));
 		public static IEnumerable<double> Decrement(this IEnumerable<double> values, double offset) => values.Select(v => v.Decrement(offset));

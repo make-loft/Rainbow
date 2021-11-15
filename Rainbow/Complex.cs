@@ -13,10 +13,10 @@ namespace Rainbow
 {
 	public struct Complex : IEquatable<Complex>, IFormattable
 	{
-		public static readonly Complex Zero = new Complex();
-		public static readonly Complex RealOne = new Complex(1.0);
-		public static readonly Complex RealTwo = new Complex(2.0);
-		public static readonly Complex ImaginaryOne = new Complex(0.0, 1.0);
+		public static readonly Complex Zero = new(0.0);
+		public static readonly Complex RealOne = new(1.0);
+		public static readonly Complex RealTwo = new(2.0);
+		public static readonly Complex ImaginaryOne = new(0.0, 1.0);
 		public static readonly Complex One = RealOne;
 
         public Complex(double real = 0.0, double imaginary = 0.0)

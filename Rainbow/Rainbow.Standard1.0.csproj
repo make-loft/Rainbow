@@ -5,6 +5,7 @@
     <TargetFramework>netstandard1.0</TargetFramework>
     <RootNamespace>Rainbow</RootNamespace>
     <AssemblyName>Rainbow</AssemblyName>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

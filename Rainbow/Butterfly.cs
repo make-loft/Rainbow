@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using static System.Math;
+
 namespace Rainbow
 {
 	public static class Butterfly
@@ -39,32 +41,32 @@ namespace Rainbow
 		private static Complex[] DecimationInTime(this Complex[] frame, bool direct)
 		{
 			if (frame.Length == 1) return frame;
-			var frameHalfSize = frame.Length >> 1; // frame.Length/2
+			var frameHalfSize = frame.Length / 2; // frame.Length >> 1
 			var frameFullSize = frame.Length;
 
-			var frameOdd = new Complex[frameHalfSize];
-			var frameEven = new Complex[frameHalfSize];
-			for (var i = 0; i < frameHalfSize; i++)
+			var frameA = new Complex[frameHalfSize];
+			var frameB = new Complex[frameHalfSize];
+
+			for (int i = 0, j = 0; i < frameHalfSize; i++) // j+=2
 			{
-				var j = i << 1; // i = 2*j;
-				frameOdd[i] = frame[j + 1];
-				frameEven[i] = frame[j];
+				frameA[i] = frame[j++];
+				frameB[i] = frame[j++];
 			}
 
-			var spectrumOdd = DecimationInTime(frameOdd, direct);
-			var spectrumEven = DecimationInTime(frameEven, direct);
+			var spectrumA = DecimationInTime(frameA, direct);
+			var spectrumB = DecimationInTime(frameB, direct);
 
-			var arg = (Pi.Double / frameFullSize).InvertSign(direct);
-			var omegaPowBase = new Complex(Math.Cos(arg), Math.Sin(arg));
-			var omega = Complex.One;
 			var spectrum = frame; // new Complex[frameFullSize];
+			var arg = (Pi.Double / frameFullSize).InvertSign(direct);
+			var omegaPowBase = new Complex(Cos(arg), Sin(arg));
+			var omega = Complex.One;
 
-			for (var j = 0; j < frameHalfSize; j++)
+			for (int i = 0, j = frameHalfSize; i < frameHalfSize; i++, j++)
 			{
-				var a = spectrumEven[j];
-				var b = spectrumOdd[j];
-				spectrum[j] = a + omega * b;
-				spectrum[j + frameHalfSize] = a - omega * b;
+				var a = spectrumA[i];
+				var b = spectrumB[i] * omega;
+				spectrum[i] = a + b;
+				spectrum[j] = a - b;
 				omega *= omegaPowBase;
 			}
 
@@ -78,7 +80,7 @@ namespace Rainbow
 			var frameFullSize = frame.Length;
 
 			var arg = (Pi.Double / frameFullSize).InvertSign(direct);
-			var omegaPowBase = new Complex(Math.Cos(arg), Math.Sin(arg));
+			var omegaPowBase = new Complex(Cos(arg), Sin(arg));
 			var omega = Complex.One;
 			var spectrum = frame; // new Complex[frameFullSize];
 
