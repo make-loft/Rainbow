@@ -69,13 +69,13 @@ namespace Rainbow
 			var frameSize = spectrum.Count;
 			var binToFrequencyFactor = sampleRate / frameSize;
 
-			for (var bin = 0; bin < frameSize; bin++)
+			for (var i = 0; i < frameSize; i++)
 			{
-				yield return new Bin
+				yield return new()
 				{
-					Phase = spectrum[bin].Phase,
-					Magnitude = spectrum[bin].Magnitude,
-					Frequency = bin * binToFrequencyFactor
+					Phase = spectrum[i].Phase,
+					Magnitude = spectrum[i].Magnitude,
+					Frequency = i * binToFrequencyFactor
 				};
 			}
 		}
@@ -85,66 +85,69 @@ namespace Rainbow
 			var count = spectrum.Count / 2 - 3;
 			for (var i = 0; i < count; i++)
 			{
-				spectrum[i + 0].Deconstruct(out var ax, out var ay, out var ap);
-				spectrum[i + 1].Deconstruct(out var bx, out var by, out var bp);
-				spectrum[i + 2].Deconstruct(out var cx, out var cy, out var cp);
-				if ((ay + cy) * 0.5d < by && by > silenceThreshold)
+				spectrum[i + 0].Deconstruct(out var aF, out var aM, out var aP);
+				spectrum[i + 1].Deconstruct(out var bF, out var bM, out var bP);
+				spectrum[i + 2].Deconstruct(out var cF, out var cM, out var cP);
+
+				if ((aM + cM) * 0.5d < bM && bM > silenceThreshold)
 					yield return spectrum[i + 1];
 			}
 		}
 
-		public static IEnumerable<Bin> Interpolate(this IList<Bin> spectrum)
+		public static bool CanCorrect(double aM, double bM, double cM, double dM, double magicFactor) =>
+			aM < bM && aM < cM
+			&&
+			dM < cM && dM * magicFactor < bM;
+
+		public static bool CanCorrect(double deltaPhase) =>
+			Pi.Single * 0.9 < deltaPhase && deltaPhase < Pi.Single * 1.1;
+
+		public static IEnumerable<Bin> Interpolate(this IList<Bin> spectrum, bool skipResonances)
 		{
-			var halfStep = (spectrum[1].Frequency - spectrum[0].Frequency) / 2;
 			var count = spectrum.Count / 2 - 4;
 			for (var i = 0; i < count; i++)
 			{
-				//var x = i < 0 ? count / 2 : 0;
-				spectrum[i + 0].Deconstruct(out var ax, out var ay, out var ap);
-				spectrum[i + 1].Deconstruct(out var bx, out var by, out var bp);
-				spectrum[i + 2].Deconstruct(out var cx, out var cy, out var cp);
-				spectrum[i + 3].Deconstruct(out var dx, out var dy, out var dp);
-				//ax = i < 0 ? bx - cx : ax;
+				/* Frequency (F); Magnitude (M); Phase (P); */
+				spectrum[i + 0].Deconstruct(out var aF, out var aM, out var aP);
+				spectrum[i + 1].Deconstruct(out var bF, out var bM, out var bP);
+				spectrum[i + 2].Deconstruct(out var cF, out var cM, out var cP);
+				spectrum[i + 3].Deconstruct(out var dF, out var dM, out var dP);
 
-				var magicFactor = cx / dx; /* for better accuracy, but why? */
-				var applyMagnitudeCorrection =
-					ay < by && ay < cy
-					&&
-					dy < cy && dy * magicFactor < by;
+				var magicFactor = cF / dF; /* for better accuracy, but why? */
+				var applyCorrection = CanCorrect(aM, bM, cM, dM, magicFactor)
+					&& (skipResonances is false || CanCorrect(Math.Abs(cP - bP)));
 
-				var deltaPhase = Math.Abs(bp - cp);
-				var applyPhaseCorrection = Pi.Single * 0.9 < deltaPhase && deltaPhase < Pi.Single * 1.1;
-
-				var applyCorrection = applyMagnitudeCorrection && applyPhaseCorrection;
 				if (applyCorrection)
 				{
-					var middle = (bx + cx) / 2;
-					var delta = (cy - by) / (cy + by);
-					var mx = middle + delta * halfStep;
-					var my = (by + cy) - (ay + dy) / Pi.Half;
+					/*
+					var halfStep = (cF - bF) / 2;
+					var bcMiddleF = (bF + cF) / 2;
+					var bcOffsetScale = (cM - bM) / (cM + bM);
+					var bcF = bcMiddleF + bcOffsetScale * halfStep;
+					*/
 
-					var lx = ax + (mx - bx);
-					var rx = dx + (mx - cx);
+					var bcF = (bF * bM + cF * cM) / (bM + cM);
+					var bcM = (bM + cM) - (aM + dM) / Pi.Half;
+					var bcP = bP + (bcF - bF) * (cP - bP) / (cF - bF);
+					/* y(x) = y0 + ( x  - x0) * (y1 - y0) / (x1 - x0) */
 
-					var ly = ay; //* (cx - mx) / halfStep;
-					var ry = dy; //* (mx - bx) / halfStep;
+					var abF = aF + (bcF - bF);
+					var abM = aM;
+					var abP = aP;
 
-					var x0 = bx;
-					var x1 = cx;
-					var y0 = bp; //bp < -(3 * Pi.Quarter) ? bp + Pi.Double : bp;
-					var y1 = cp; //cp > +(1 * Pi.Quarter) ? cp - Pi.Double : cp;
+					var dcF = dF + (bcF - cF);
+					var dcM = dM;
+					var dcP = dP;
 
-					var mp = y0 + (mx - x0) * (y0 - y1) / (x0 - x1);
-
-					yield return new(in lx, in ly, in ap);
-					yield return new(in mx, in my, in mp);
-					yield return new(in rx, in ry, in dp);
+					yield return new(in abF, in abM, in abP);
+					yield return new(in bcF, in bcM, in bcP);
+					yield return new(in dcF, in dcM, in dcP);
 
 					i += 3;
 				}
 				else
 				{
-					yield return new(in ax, in ay, in ap);
+					yield return new(in aF, in aM, in aP);
 				}
 			}
 		}
