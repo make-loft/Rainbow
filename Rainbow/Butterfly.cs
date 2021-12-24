@@ -1,6 +1,4 @@
-﻿
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 using static System.Math;
@@ -27,6 +25,7 @@ namespace Rainbow
 		{
 			var inputFrame = frame.ToArray();
 			var inputFactor = direct ? 1d : inputFrame.Length / 2;
+
 			inputFrame.Squeeze(inputFactor);
 
 			var outputFrame = inTime
@@ -36,19 +35,19 @@ namespace Rainbow
 			var outputFactor = direct ? outputFrame.Length / 2 : 1d;
 
 			outputFrame.Squeeze(outputFactor);
+
 			return outputFrame;
 		}
 
 		private static Complex[] DecimationInTime(this Complex[] frame, bool direct)
 		{
 			if (frame.Length == 1) return frame;
-			var frameHalfSize = frame.Length / 2; // frame.Length >> 1
-			var frameFullSize = frame.Length;
+			var length = frame.Length / 2; // frame.Length >> 1
 
-			var frameA = new Complex[frameHalfSize];
-			var frameB = new Complex[frameHalfSize];
+			var frameA = new Complex[length];
+			var frameB = new Complex[length];
 
-			for (int i = 0, j = 0; i < frameHalfSize; i++) // j+=2
+			for (int i = 0, j = 0; i < length; i++) // j+=2
 			{
 				frameA[i] = frame[j++];
 				frameB[i] = frame[j++];
@@ -57,12 +56,12 @@ namespace Rainbow
 			var spectrumA = DecimationInTime(frameA, direct);
 			var spectrumB = DecimationInTime(frameB, direct);
 
-			var spectrum = frame; // new Complex[frameFullSize];
-			var arg = (Pi.Double / frameFullSize).InvertSign(direct);
+			var spectrum = frame; // new Complex[frame.Length];
+			var arg = (Pi.Single / length).InvertSign(direct);
 			var omegaPowBase = new Complex(Cos(arg), Sin(arg));
 			var omega = Complex.One;
 
-			for (int i = 0, j = frameHalfSize; i < frameHalfSize; i++, j++)
+			for (int i = 0, j = length; i < length; i++, j++)
 			{
 				var a = spectrumA[i];
 				var b = spectrumB[i] * omega;
@@ -77,34 +76,33 @@ namespace Rainbow
 		private static Complex[] DecimationInFrequency(this Complex[] frame, bool direct)
 		{
 			if (frame.Length == 1) return frame;
-			var frameHalfSize = frame.Length >> 1; // frame.Length/2
-			var frameFullSize = frame.Length;
+			var length = frame.Length / 2; // frame.Length >> 1
 
-			var arg = (Pi.Double / frameFullSize).InvertSign(direct);
+			var arg = (Pi.Single / length).InvertSign(direct);
 			var omegaPowBase = new Complex(Cos(arg), Sin(arg));
 			var omega = Complex.One;
-			var spectrum = frame; // new Complex[frameFullSize];
+			var spectrum = frame; // new Complex[frame.Length];
 
-			for (var j = 0; j < frameHalfSize; j++)
+			for (var j = 0; j < length; j++)
 			{
 				var a = frame[j];
-				var b = frame[j + frameHalfSize];
+				var b = frame[j + length];
 				spectrum[j] = a + b;
-				spectrum[j + frameHalfSize] = omega * (a - b);
+				spectrum[j + length] = omega * (a - b);
 				omega *= omegaPowBase;
 			}
 
-			var yTop = new Complex[frameHalfSize];
-			var yBottom = new Complex[frameHalfSize];
-			for (var i = 0; i < frameHalfSize; i++)
+			var yTop = new Complex[length];
+			var yBottom = new Complex[length];
+			for (var i = 0; i < length; i++)
 			{
 				yTop[i] = spectrum[i];
-				yBottom[i] = spectrum[i + frameHalfSize];
+				yBottom[i] = spectrum[i + length];
 			}
 
 			var spectrumTop = DecimationInFrequency(yTop, direct);
 			var spectrumBottom = DecimationInFrequency(yBottom, direct);
-			for (var i = 0; i < frameHalfSize; i++)
+			for (var i = 0; i < length; i++)
 			{
 				var j = i << 1; // i = 2*j;
 				spectrum[j] = spectrumTop[i];
