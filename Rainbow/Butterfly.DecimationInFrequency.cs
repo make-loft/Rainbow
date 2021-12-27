@@ -4,13 +4,13 @@ namespace Rainbow
 {
 	public static partial class Butterfly
 	{
-		private static void DecimationInFrequency(ref Complex[] frame, bool direct)
+		private static void DecimationInFrequency(ref Complex[] sample, bool direct)
 		{
-			if (frame.Length < 2) return;
-			var length = frame.Length / 2; // frame.Length >> 1
+			if (sample.Length < 2) return;
+			var length = sample.Length / 2; // sample.Length >> 1
 
-			var frameA = new Complex[length];
-			var frameB = new Complex[length];
+			var sampleA = new Complex[length];
+			var sampleB = new Complex[length];
 
 			var abs = (Pi.Single / length).InvertSign(direct);
 			var rotorBase = new Complex(Cos(abs), Sin(abs));
@@ -18,20 +18,20 @@ namespace Rainbow
 
 			for (int i = 0, j = length; i < length; i++, j++)
 			{
-				var a = frame[i];
-				var b = frame[j];
-				frameA[i] = a + b;
-				frameB[i] = (a - b) * rotor;
+				var a = sample[i];
+				var b = sample[j];
+				sampleA[i] = a + b;
+				sampleB[i] = (a - b) * rotor;
 				rotor *= rotorBase; // rotor = rotorBase.Pow(i + 1)
 			}
 
-			DecimationInFrequency(ref frameA, direct);
-			DecimationInFrequency(ref frameB, direct);
+			DecimationInFrequency(ref sampleA, direct);
+			DecimationInFrequency(ref sampleB, direct);
 
 			for (int i = 0, j = 0; i < length; i++) // j += 2
 			{
-				frame[j++] = frameA[i];
-				frame[j++] = frameB[i];
+				sample[j++] = sampleA[i];
+				sample[j++] = sampleB[i];
 			}
 		}
 	}

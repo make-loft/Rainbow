@@ -5,32 +5,17 @@ namespace Rainbow
 {
 	public static partial class Butterfly
 	{
-		public static Complex[] Stretch(this Complex[] frame, double factor)
+		public static Complex[] Transform(this IEnumerable<Complex> sample, bool direct, bool inTime = false)
 		{
-			if (factor == 1d) return frame;
-			for (var i = 0; i < frame.Length; i++) frame[i] *= factor;
-			return frame;
-		}
+			var workSample = sample.ToArray();
 
-		public static Complex[] Squeeze(this Complex[] frame, double factor)
-		{
-			if (factor == 1d) return frame;
-			for (var i = 0; i < frame.Length; i++) frame[i] /= factor;
-			return frame;
-		}
+			if (inTime) DecimationInTime(ref workSample, direct);
+			else DecimationInFrequency(ref workSample, direct);
 
-		public static Complex[] Decimation(this IEnumerable<Complex> frame, bool direct, bool inTime = false)
-		{
-			var workFrame = frame.ToArray();
+			var factor = direct ? workSample.Length / 2 : 2;
+			for (var i = 0; i < workSample.Length; i++)	workSample[i] /= factor;
 
-			if (inTime) DecimationInTime(ref workFrame, direct);
-			else DecimationInFrequency(ref workFrame, direct);
-
-			var factor = direct ? workFrame.Length / 2 : 2;
-
-			workFrame.Squeeze(factor);
-
-			return workFrame;
+			return workSample;
 		}
 	}
 }
