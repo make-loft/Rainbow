@@ -59,7 +59,7 @@ namespace Rainbow
 				spectrum[i + 1].Deconstruct(out var bF, out var bM, out var bP);
 				spectrum[i + 2].Deconstruct(out var cF, out var cM, out var cP);
 
-				if ((aM + cM) * 0.4d < bM && aM < bM && bM > cM && bM > silenceThreshold)
+				if ((aM + cM) * 0.25d < bM && aM < bM && bM > cM && bM > silenceThreshold)
 					yield return spectrum[i + 1];
 			}
 		}
