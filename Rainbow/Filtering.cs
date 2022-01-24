@@ -30,7 +30,7 @@ namespace Rainbow
 
 				var actualFrequancy = (binBase + binDeviation) * binToFrequency;
 				var magnitude = (spectrum1[binBase].Magnitude + spectrum0[binBase].Magnitude) / 2d;
-				yield return new Bin(actualFrequancy, magnitude * (1 + binDeviation), actualDeltaPhase);
+				yield return new(actualFrequancy, magnitude * (1 + binDeviation), actualDeltaPhase);
 			}
 		}
 
@@ -64,16 +64,11 @@ namespace Rainbow
 			}
 		}
 
-		public static bool CanCorrect(double aM, double bM, double cM, double dM, double magicFactor) =>
-			aM < bM && aM < cM
-			&&
-			dM < cM && dM * magicFactor < bM;
 
-		public static bool CanCorrect(double deltaPhase) =>
-			Pi.Single * 0.9 < deltaPhase && deltaPhase < Pi.Single * 1.1;
-
-		public static IEnumerable<Bin> Interpolate(this IList<Bin> spectrum, bool skipResonances)
+		public static IEnumerable<Bin> Interpolate(this IList<Bin> spectrum, List<int> resonances = default)
 		{
+			resonances?.Clear();
+
 			var count = spectrum.Count / 2 - 4;
 			for (var i = 0; i < count; i++)
 			{
@@ -83,11 +78,26 @@ namespace Rainbow
 				spectrum[i + 2].Deconstruct(out var cF, out var cM, out var cP);
 				spectrum[i + 3].Deconstruct(out var dF, out var dM, out var dP);
 
-				var magicFactor = cF / dF; /* for better accuracy, but why? */
-				var applyCorrection = CanCorrect(aM, bM, cM, dM, magicFactor)
-					&& (skipResonances is false || CanCorrect(Math.Abs(cP - bP)));
+				double GetPeakProbabilityByPhase() => Math.Abs(cP - bP) / Pi.Single;
+				double GetPeakProbabilityByMagnitude()
+				{
+					var bcM = (bM + cM) - (aM + dM) / Pi.Half;
+					return 
+						(aM < bcM && bcM > dM)
+						&&
+						(bM * 0.95 < bcM && bcM > cM * 0.95)
+							? 0.95
+							: 0.05;
+				}
 
-				if (applyCorrection)
+				var peakProbabilityByPhase = GetPeakProbabilityByPhase();
+				var peakProbabilityByMagnitude = GetPeakProbabilityByMagnitude();
+
+				var peakProbability = peakProbabilityByPhase * peakProbabilityByMagnitude;
+				if (peakProbabilityByMagnitude > 0.5 && peakProbabilityByPhase < 0.5)
+					resonances?.Add(i);
+
+				if (peakProbability > 0.5)
 				{
 					/*
 					var halfStep = (cF - bF) / 2;
@@ -113,7 +123,7 @@ namespace Rainbow
 					yield return new(in bcF, in bcM, in bcP);
 					yield return new(in dcF, in dcM, in dcP);
 
-					i += 3;
+					i += 2;
 				}
 				else
 				{
