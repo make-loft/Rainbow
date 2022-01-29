@@ -123,7 +123,7 @@ namespace Rainbow
 					yield return new(in bcF, in bcM, in bcP);
 					yield return new(in dcF, in dcM, in dcP);
 
-					i += 2;
+					i += 3;
 				}
 				else
 				{
