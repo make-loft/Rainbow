@@ -40,10 +40,10 @@ namespace Rainbow
 				if (peakProbability > 0.5)
 				{
 					/*
-					var halfStep = (cF - bF) / 2;
+					var halfStepF = (cF - bF) / 2;
 					var bcMiddleF = (bF + cF) / 2;
 					var bcOffsetScale = (cM - bM) / (cM + bM);
-					var bcF = bcMiddleF + bcOffsetScale * halfStep;
+					var bcF = bcMiddleF + bcOffsetScale * halfStepF;
 					*/
 
 					var bcF = (bF * bM + cF * cM) / (bM + cM);
