@@ -12,8 +12,8 @@ namespace Rainbow
 			if (inTime) DecimationInTime(ref workSample, direct);
 			else DecimationInFrequency(ref workSample, direct);
 
-			var factor = direct ? workSample.Length / 2 : 2;
-			for (var i = 0; i < workSample.Length; i++)	workSample[i] /= factor;
+			double factor = direct ? workSample.Length / 2 : 2;
+			for (var i = 0; i < workSample.Length; i++) workSample[i] /= factor;
 
 			return workSample;
 		}
