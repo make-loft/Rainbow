@@ -22,7 +22,7 @@ namespace Rainbow
 
 		public static IEnumerable<Bin> EnumeratePeaks(this IList<Bin> spectrum, double silenceThreshold = 0.01)
 		{
-			var count = spectrum.Count / 2 - 3;
+			var count = spectrum.Count - 3;
 			for (var i = 0; i < count; i++)
 			{
 				spectrum[i + 0].Deconstruct(out var aF, out var aM, out var aP);

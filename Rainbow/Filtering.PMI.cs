@@ -9,7 +9,7 @@ namespace Rainbow
 		{
 			resonances?.Clear();
 
-			var count = spectrum.Count / 2 - 4;
+			var count = spectrum.Count / 2 - 1;
 			for (var i = 0; i < count; i++)
 			{
 				/* Frequency (F); Magnitude (M); Phase (P); */
