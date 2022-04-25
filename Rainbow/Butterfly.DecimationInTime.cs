@@ -1,20 +1,15 @@
-﻿using static System.Math;
-
-namespace Rainbow
+﻿namespace Rainbow
 {
 	public static partial class Butterfly
 	{
-		private static void DecimationInTime(ref Complex[] sample, bool direct)
+		private static void DecimationInTime(ref Complex[] sample, System.Func<int, Complex[]> getRotor)
 		{
 			if (sample.Length < 2) return;
-			var length = sample.Length / 2; // sample.Length >> 1
+			var length = sample.Length / 2;
 
 			var sampleA = new Complex[length];
 			var sampleB = new Complex[length];
-
-			var abs = (Pi.Single / length).InvertSign(direct);
-			var rotorBase = new Complex(Cos(abs), Sin(abs));
-			var rotor = Complex.One; // rotor = rotorBase.Pow(0)
+			var rotor = getRotor(length);
 
 			for (int i = 0, j = 0; i < length; i++) // j+=2
 			{
@@ -22,16 +17,16 @@ namespace Rainbow
 				sampleB[i] = sample[j++];
 			}
 
-			DecimationInTime(ref sampleA, direct);
-			DecimationInTime(ref sampleB, direct);
+			DecimationInTime(ref sampleA, getRotor);
+			DecimationInTime(ref sampleB, getRotor);
 
 			for (int i = 0, j = length; i < length; i++, j++)
 			{
 				var a = sampleA[i];
-				var b = sampleB[i] * rotor;
+				var b = sampleB[i] * rotor[i];
+
 				sample[i] = a + b;
 				sample[j] = a - b;
-				rotor *= rotorBase; // rotor = rotorBase.Pow(i + 1)
 			}
 		}
 	}
