@@ -51,6 +51,11 @@ namespace Rainbow
 					var bcP = bP + (bcF - bF) * (cP - bP) / (cF - bF);
 					/* y(x) = y0 + ( x  - x0) * (y1 - y0) / (x1 - x0) */
 
+					if (cP > bP)
+						bcP += Pi.Double * (cF - bcF) / (cF - bF);
+					if (bcP > Pi.Single)
+						bcP -= Pi.Double;
+
 					var abF = aF + (bcF - bF);
 					var abM = aM;
 					var abP = aP;
