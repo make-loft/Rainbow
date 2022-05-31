@@ -37,7 +37,7 @@ namespace Rainbow
 				if (peakProbabilityByMagnitude > 0.5 && peakProbabilityByPhase < 0.5)
 					resonances?.Add(i);
 
-				if (peakProbability > 0.5)
+				if (0.5 < peakProbability  && peakProbability < 1.5)
 				{
 					/*
 					var halfStepF = (cF - bF) / 2;
