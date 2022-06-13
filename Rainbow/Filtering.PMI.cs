@@ -1,60 +1,70 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Rainbow
 {
 	public static partial class Filtering
 	{
-		public static IEnumerable<Bin> Interpolate(this IList<Bin> spectrum, List<int> resonances = default)
-		{
-			resonances?.Clear();
+		public static List<Bin> Interpolate(this IList<Bin> spectrum, out List<Bin> peaks) =>
+			spectrum.Interpolate(peaks = new()).ToList();
 
-			var count = spectrum.Count / 2 - 1;
+		public static bool TryReconstructPeak(this IList<Bin> spectrum, int i, out Bin peak, out double deltaPhase)
+		{
+			/* Frequency (F); Magnitude (M); Phase (P); */
+			spectrum[i + 0].Deconstruct(out var aF, out var aM, out var aP);
+			spectrum[i + 1].Deconstruct(out var bF, out var bM, out var bP);
+			spectrum[i + 2].Deconstruct(out var cF, out var cM, out var cP);
+			spectrum[i + 3].Deconstruct(out var dF, out var dM, out var dP);
+
+			/*
+			var halfStepF = (cF - bF) / 2;
+			var bcMiddleF = (bF + cF) / 2;
+			var bcOffsetScale = (cM - bM) / (cM + bM);
+			var bcF = bcMiddleF + bcOffsetScale * halfStepF;
+			*/
+
+			var bcF = (bF * bM + cF * cM) / (bM + cM);
+			var bcM = (bM + cM) - (aM + dM) / Pi.Half;
+			var bcP = bP + (bcF - bF) * (cP - bP) / (cF - bF);
+			/* y(x) = y0 + ( x  - x0) * (y1 - y0) / (x1 - x0) */
+
+			if (cP > bP)
+				bcP += Pi.Double * (cF - bcF) / (cF - bF);
+			if (bcP > Pi.Single)
+				bcP -= Pi.Double;
+
+			peak = new(bcF, bcM, bcP);
+
+			deltaPhase = cP - bP;
+
+			return Math.Abs(deltaPhase) < 1.5 * Pi.Single && bcM > Math.Max(bM, cM) * 0.8 && bcF.BelongOpen(bF, cF);
+		}
+
+
+		public static IEnumerable<Bin> Interpolate(this IList<Bin> spectrum, List<Bin> peaks)
+		{
+			var count = spectrum.Count / 2;
+
 			for (var i = 0; i < count; i++)
 			{
-				/* Frequency (F); Magnitude (M); Phase (P); */
-				spectrum[i + 0].Deconstruct(out var aF, out var aM, out var aP);
-				spectrum[i + 1].Deconstruct(out var bF, out var bM, out var bP);
-				spectrum[i + 2].Deconstruct(out var cF, out var cM, out var cP);
-				spectrum[i + 3].Deconstruct(out var dF, out var dM, out var dP);
-
-				double GetPeakProbabilityByPhase() => Math.Abs(cP - bP) / Pi.Single;
-				double GetPeakProbabilityByMagnitude()
+				var hasL = spectrum.TryReconstructPeak(i + 0, out var peakCandidateL, out var deltaPhaseL);
+				var hasR = spectrum.TryReconstructPeak(i + 1, out var peakCandidateR, out var deltaPhaseR);
+				
+				if (hasL is false || (hasR is true && Math.Abs(deltaPhaseR) > Math.Abs(deltaPhaseL)))
 				{
-					var bcM = (bM + cM) - (aM + dM) / Pi.Half;
-					return 
-						(aM < bcM && bcM > dM)
-						&&
-						(bM * 0.95 < bcM && bcM > cM * 0.95)
-							? 0.95
-							: 0.05;
+					yield return spectrum[i];
 				}
-
-				var peakProbabilityByPhase = GetPeakProbabilityByPhase();
-				var peakProbabilityByMagnitude = GetPeakProbabilityByMagnitude();
-
-				var peakProbability = peakProbabilityByPhase * peakProbabilityByMagnitude;
-				if (peakProbabilityByMagnitude > 0.5 && peakProbabilityByPhase < 0.5)
-					resonances?.Add(i);
-
-				if (0.5 < peakProbability  && peakProbability < 1.5)
+				else
 				{
-					/*
-					var halfStepF = (cF - bF) / 2;
-					var bcMiddleF = (bF + cF) / 2;
-					var bcOffsetScale = (cM - bM) / (cM + bM);
-					var bcF = bcMiddleF + bcOffsetScale * halfStepF;
-					*/
+					peaks.Add(peakCandidateL);
 
-					var bcF = (bF * bM + cF * cM) / (bM + cM);
-					var bcM = (bM + cM) - (aM + dM) / Pi.Half;
-					var bcP = bP + (bcF - bF) * (cP - bP) / (cF - bF);
-					/* y(x) = y0 + ( x  - x0) * (y1 - y0) / (x1 - x0) */
+					var bcF = peakCandidateL.Frequency;
+					var bF = spectrum[i + 1].Frequency;
+					var cF = spectrum[i + 2].Frequency;
 
-					if (cP > bP)
-						bcP += Pi.Double * (cF - bcF) / (cF - bF);
-					if (bcP > Pi.Single)
-						bcP -= Pi.Double;
+					spectrum[i + 0].Deconstruct(out var aF, out var aM, out var aP);
+					spectrum[i + 3].Deconstruct(out var dF, out var dM, out var dP);
 
 					var abF = aF + (bcF - bF);
 					var abM = aM;
@@ -65,14 +75,10 @@ namespace Rainbow
 					var dcP = dP;
 
 					yield return new(in abF, in abM, in abP);
-					yield return new(in bcF, in bcM, in bcP);
+					yield return peakCandidateL;
 					yield return new(in dcF, in dcM, in dcP);
 
 					i += 3;
-				}
-				else
-				{
-					yield return new(in aF, in aM, in aP);
 				}
 			}
 		}

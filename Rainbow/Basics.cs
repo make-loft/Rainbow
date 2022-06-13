@@ -37,5 +37,17 @@ namespace Rainbow
 		public static double Mod(this in double value, in double module = +1d) => value % module;
 		public static double Truncate(this in double value, in double module = +1d) => value - value % module;
 		public static double InvertSign(this in double d, bool negate) => negate ? -d : +d;
+
+		public static bool BelongOpen(this double value, double from, double till) =>
+			from < value && value < till;
+
+		public static bool BelongCloseOpen(this double value, double from, double till) =>
+			from <= value && value < till;
+
+		public static bool BelongOpenClose(this double value, double from, double till) =>
+			from < value && value <= till;
+
+		public static bool BelongClose(this double value, double from, double till) =>
+			from <= value && value <= till;
 	}
 }
