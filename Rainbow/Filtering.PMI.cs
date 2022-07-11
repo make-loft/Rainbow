@@ -17,12 +17,10 @@ namespace Rainbow
 			spectrum[i + 2].Deconstruct(out var cF, out var cM, out var cP);
 			spectrum[i + 3].Deconstruct(out var dF, out var dM, out var dP);
 
-			/*
-			var halfStepF = (cF - bF) / 2;
-			var bcMiddleF = (bF + cF) / 2;
+			//var halfStepF = (cF - bF) / 2;
+			//var bcMiddleF = (bF + cF) / 2;
 			var bcOffsetScale = (cM - bM) / (cM + bM);
-			var bcF = bcMiddleF + bcOffsetScale * halfStepF;
-			*/
+			//var bcF = bcMiddleF + bcOffsetScale * halfStepF;
 
 			var bcF = (bF * bM + cF * cM) / (bM + cM);
 			var bcM = (bM + cM) - (aM + dM) / Pi.Half;
@@ -35,10 +33,14 @@ namespace Rainbow
 				bcP -= Pi.Double;
 
 			peak = new(bcF, bcM, bcP);
-
+			
 			deltaPhase = cP - bP;
 
-			return Math.Abs(deltaPhase) < 1.5 * Pi.Single && bcM > Math.Max(bM, cM) * 0.8 && bcF.BelongOpen(bF, cF);
+			var isPeakByFrequency = bcF.BelongOpen(bF, cF);
+			var isPeakByMagnitude = bcM > Math.Max(bM, cM) / 2d;
+			var isPeakByPhase = Math.Abs(deltaPhase).BelongClose((1d - Math.Abs(bcOffsetScale)) * Pi.Half, 1.5 * Pi.Single);
+			
+			return isPeakByPhase && isPeakByMagnitude && isPeakByFrequency;
 		}
 
 
