@@ -11,9 +11,19 @@ namespace Rainbow
 		{
 			var workSample = sample.ToArray();
 			var rotors = direct ? DirectRotors : RevertRotors;
-			Complex[] getRotor(int length) => rotors.TryGetValue(length, out var rotor)
-				? rotor
-				: rotors[length] = GenerateRotor(length, direct);
+
+			Complex[] getRotor(int length)
+			{
+				if (rotors.TryGetValue(length, out var rotor))
+					return rotor;
+
+				lock (rotors)
+				{
+					if (rotors.TryGetValue(length, out rotor))
+						return rotor;
+					return rotors[length] = GenerateRotor(length, direct);
+				}
+			};
 
 			if (inTime) DecimationInTime(ref workSample, getRotor);
 			else DecimationInFrequency(ref workSample, getRotor);
