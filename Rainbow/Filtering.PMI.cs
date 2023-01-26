@@ -80,7 +80,7 @@ namespace Rainbow
 					yield return peakCandidateL;
 					yield return new(in dcF, in dcM, in dcP);
 
-					i += 2;
+					i += hasR ? 2 : 3;
 				}
 			}
 		}
