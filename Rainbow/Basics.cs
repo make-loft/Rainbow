@@ -24,7 +24,7 @@ namespace Rainbow
 		public static IEnumerable<double> Negation(this IEnumerable<double> values) => values.Select(v => v.Negation());
 
 		public static IEnumerable<double> Shift(this IEnumerable<double> values, double offset) => values.Select(v => v.Shift(offset));
-		public static IEnumerable<double> Scale(this IEnumerable<double> values, double offset) => values.Select(v => v.Scale(offset));
+		public static IEnumerable<double> Scale(this IEnumerable<double> values, double factor) => values.Select(v => v.Scale(factor));
 
 		public static IEnumerable<double> Increment(this IEnumerable<double> values, double offset) => values.Select(v => v.Increment(offset));
 		public static IEnumerable<double> Decrement(this IEnumerable<double> values, double offset) => values.Select(v => v.Decrement(offset));
