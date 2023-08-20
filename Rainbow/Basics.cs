@@ -38,16 +38,34 @@ namespace Rainbow
 		public static double Truncate(this in double value, in double module = +1d) => value - value % module;
 		public static double InvertSign(this in double d, bool negate) => negate ? -d : +d;
 
-		public static bool BelongOpen(this double value, double from, double till) =>
-			from < value && value < till;
+		public static bool HitInterval(this double value,
+			double from = double.NegativeInfinity,
+			double till = double.PositiveInfinity,
+			HitMode mode = HitMode.OpenOpen) => mode switch
+			{
+				HitMode.OpenOpen => value.HitIntervalOpenOpen(from, till),
+				HitMode.OpenClose => value.HitIntervalOpenClose(from, till),
+				HitMode.CloseOpen => value.HitIntervalCloseOpen(from, till),
+				HitMode.CloseClose => value.HitIntervalCloseClose(from, till),
+				_ => throw new NotImplementedException(),
+			};
 
-		public static bool BelongCloseOpen(this double value, double from, double till) =>
-			from <= value && value < till;
+		public static bool HitIntervalOpenOpen(this double value, double from, double till) => from < till
+			? from < value && value < till
+			: till < value && value < from;
 
-		public static bool BelongOpenClose(this double value, double from, double till) =>
-			from < value && value <= till;
+		public static bool HitIntervalCloseOpen(this double value, double from, double till) => from < till
+			? from <= value && value < till
+			: till < value && value <= from;
 
-		public static bool BelongClose(this double value, double from, double till) =>
-			from <= value && value <= till;
+		public static bool HitIntervalOpenClose(this double value, double from, double till) => from < till
+			? from < value && value <= till
+			: till <= value && value < from;
+
+		public static bool HitIntervalCloseClose(this double value, double from, double till) => from < till
+			? from <= value && value <= till
+			: till <= value && value <= from;
 	}
+
+	public enum HitMode { OpenOpen, OpenClose, CloseOpen, CloseClose };
 }

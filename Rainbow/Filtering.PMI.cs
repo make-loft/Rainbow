@@ -22,7 +22,7 @@ namespace Rainbow
 			if (turn && distance < -1.0)
 				distance += 2.0;
 
-			var isPeakByPhase = 0.9 < Math.Abs(distance) && Math.Abs(distance) <= 1.1;
+			var isPeakByPhase = (distance * distance).HitInterval(from: 0.5, till :2.0 + 0.01);
 
 			if (isPeakByPhase is false)
 			{
@@ -44,24 +44,28 @@ namespace Rainbow
 				bcP += Pi.Double * (cF - bcF) / (cF - bF);
 			if (bcP > Pi.Single)
 				bcP -= Pi.Double;
-			
-			//if (bcM < (bM + cM)) // resonanse estimation
-			//	bcM = Math.Sqrt(bM * bM + cM * cM);
 
-			//var _bcM = bM + (bcF - bF) * (cM - bM) / (cF - bF);
-			//var isPeakByMagnitude = _bcM < bcM;
-			var isPeakByMagnitude = bcM > 0d && bcM * bcM > bM * bM + cM * cM;
-			if (isPeakByMagnitude is false && bcM < (bM + cM)) // resonanse estimation
-				bcM = Math.Sqrt(bM * bM + cM * cM);
+			var bPower = bM * bM;
+			var cPower = cM * cM;
+			var bcPower = bcM * bcM;
+
+			var isPeakByMagnitude = bcM > 0d && bcPower > bPower + cPower;
+			if (isPeakByMagnitude is false && bcPower < 2 * bM * cM &&  bcM < (bM + cM))
+			{
+				/* resonanse estimation */
+				bcM = Math.Sqrt(bPower + cPower);
+				isPeakByMagnitude = true;
+			}
 
 			peak = new(bcF, bcM, bcP);
 
-			return isPeakByPhase;
+			return isPeakByPhase && isPeakByMagnitude;
 		}
 
 		public static IEnumerable<Bin> Interpolate(this IList<Bin> spectrum)
 		{
-			var count = spectrum.Count / 2;
+			var count = spectrum.Count / 2 - 3;
+			if (count < 0) throw new Exception("Spectrum size is too short");
 
 			for (var i = 0; i < count; i++)
 			{
