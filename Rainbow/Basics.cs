@@ -52,19 +52,23 @@ namespace Rainbow
 
 		public static bool HitIntervalOpenOpen(this double value, double from, double till) => from < till
 			? from < value && value < till
-			: till < value && value < from;
+			: from < value || value < till
+			;
 
 		public static bool HitIntervalCloseOpen(this double value, double from, double till) => from < till
 			? from <= value && value < till
-			: till < value && value <= from;
+			: from <= value || value < till
+			;
 
 		public static bool HitIntervalOpenClose(this double value, double from, double till) => from < till
 			? from < value && value <= till
-			: till <= value && value < from;
+			: from < value || value <= till
+			;
 
 		public static bool HitIntervalCloseClose(this double value, double from, double till) => from < till
 			? from <= value && value <= till
-			: till <= value && value <= from;
+			: from <= value || value <= till
+			;
 	}
 
 	public enum HitMode { OpenOpen, OpenClose, CloseOpen, CloseClose };
