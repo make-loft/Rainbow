@@ -2,9 +2,9 @@
 {
 	public struct Bin
 	{
-		public double Frequency { get; set; }
-		public double Magnitude { get; set; }
-		public double Phase { get; set; }
+		public double Frequency { get; private set; }
+		public double Magnitude { get; private set; }
+		public double Phase { get; private set; }
 
 		public override string ToString() => $"{Magnitude:F4} {Frequency:F4} {Phase:F4}";
 

@@ -11,12 +11,8 @@ namespace Rainbow
 
 			for (var i = 0; i < frameSize; i++)
 			{
-				yield return new()
-				{
-					Phase = spectrum[i].Phase,
-					Magnitude = spectrum[i].Magnitude,
-					Frequency = i * binToFrequency
-				};
+				var bin = spectrum[i];
+				yield return new(i * binToFrequency, bin.Magnitude, bin.Phase);
 			}
 		}
 	}
