@@ -1,6 +1,6 @@
 ﻿namespace Rainbow
 {
-	public class Pi
+	public static class Pi
 	{
 		public const double Quarter = Half / 2d;
 		public const double Half = Single / 2d;
