@@ -1,33 +1,32 @@
-﻿namespace Rainbow
+﻿namespace Rainbow;
+
+public static partial class Butterfly
 {
-	public static partial class Butterfly
+	private static void DecimationInFrequency(ref Complex[] sample, System.Func<int, Complex[]> getRotor)
 	{
-		private static void DecimationInFrequency(ref Complex[] sample, System.Func<int, Complex[]> getRotor)
+		if (sample.Length < 2) return;
+		var length = sample.Length / 2;
+
+		var sampleA = new Complex[length];
+		var sampleB = new Complex[length];
+		var rotor = getRotor(length);
+
+		for (int i = 0, j = length; i < length; i++, j++)
 		{
-			if (sample.Length < 2) return;
-			var length = sample.Length / 2;
+			var a = sample[i];
+			var b = sample[j];
 
-			var sampleA = new Complex[length];
-			var sampleB = new Complex[length];
-			var rotor = getRotor(length);
+			sampleA[i] = a + b;
+			sampleB[i] = (a - b) * rotor[i];
+		}
 
-			for (int i = 0, j = length; i < length; i++, j++)
-			{
-				var a = sample[i];
-				var b = sample[j];
+		DecimationInFrequency(ref sampleA, getRotor);
+		DecimationInFrequency(ref sampleB, getRotor);
 
-				sampleA[i] = a + b;
-				sampleB[i] = (a - b) * rotor[i];
-			}
-
-			DecimationInFrequency(ref sampleA, getRotor);
-			DecimationInFrequency(ref sampleB, getRotor);
-
-			for (int i = 0, j = 0; i < length; i++) // j += 2
-			{
-				sample[j++] = sampleA[i];
-				sample[j++] = sampleB[i];
-			}
+		for (int i = 0, j = 0; i < length; i++) // j += 2
+		{
+			sample[j++] = sampleA[i];
+			sample[j++] = sampleB[i];
 		}
 	}
 }
