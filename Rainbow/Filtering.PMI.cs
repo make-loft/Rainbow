@@ -58,8 +58,8 @@ public static partial class Filtering
 		return peakByPhaseState && peakByMagnitudeState is true;
 	}
 
-	public static List<Bin> Interpolate(this IList<Bin> spectrum, out List<Bin> peaks) =>
-		spectrum.Interpolate(peaks = new()).ToList();
+	public static List<Bin> Interpolate(this IList<Bin> spectrum, out List<Bin> peaks)
+		=> spectrum.Interpolate(peaks = new()).ToList();
 
 	private static IEnumerable<Bin> Interpolate(this IList<Bin> spectrum, List<Bin> peaks)
 	{

@@ -6,9 +6,6 @@
 using System;
 using System.Globalization;
 
-// ReSharper disable once CheckNamespace
-// ReSharper disable CompareOfFloatsByEqualityOperator
-
 namespace Rainbow;
 
 public readonly struct Complex : IEquatable<Complex>, IFormattable
@@ -19,7 +16,7 @@ public readonly struct Complex : IEquatable<Complex>, IFormattable
 	public static readonly Complex ImaginaryOne = new(0.0, 1.0);
 	public static readonly Complex One = RealOne;
 
-        public Complex(double real = 0.0, double imaginary = 0.0)
+	public Complex(double real = 0.0, double imaginary = 0.0)
 	{
 		Real = real;
 		Imaginary = imaginary;
@@ -32,8 +29,8 @@ public readonly struct Complex : IEquatable<Complex>, IFormattable
 	}
 
 	public double Real { get; }
-        public double Imaginary { get; }
-        public double Magnitude => Abs(this);
+    public double Imaginary { get; }
+    public double Magnitude => Abs(this);
 	public double Phase => Math.Atan2(Imaginary, Real);
 	
 	public bool Is(Complex value) => Real == value.Real && Imaginary == value.Imaginary;
@@ -63,14 +60,14 @@ public readonly struct Complex : IEquatable<Complex>, IFormattable
 	public static Complex operator +(Complex value) => new(+value.Real, +value.Imaginary);
 	public static Complex operator -(Complex value) => new(-value.Real, -value.Imaginary);
 
-	public static Complex operator +(Complex left, Complex right) =>
-		new(left.Real + right.Real, left.Imaginary + right.Imaginary);
+	public static Complex operator +(Complex left, Complex right)
+		=> new(left.Real + right.Real, left.Imaginary + right.Imaginary);
 
-	public static Complex operator -(Complex left, Complex right) =>
-		new(left.Real - right.Real, left.Imaginary - right.Imaginary);
+	public static Complex operator -(Complex left, Complex right)
+		=> new(left.Real - right.Real, left.Imaginary - right.Imaginary);
 
-	public static Complex operator *(Complex left, Complex right) =>
-		new(left.Real * right.Real - left.Imaginary * right.Imaginary,
+	public static Complex operator *(Complex left, Complex right)
+		=> new(left.Real * right.Real - left.Imaginary * right.Imaginary,
 		left.Imaginary * right.Real + left.Real * right.Imaginary);
 
 	public static Complex operator /(Complex left, Complex right)
@@ -118,8 +115,8 @@ public readonly struct Complex : IEquatable<Complex>, IFormattable
 	public static Complex Conjugate(Complex value) => new(value.Real, -value.Imaginary);
 	public static Complex Reciprocal(Complex value) => value.Is(Zero) ? Zero : One / value;
 	
-	public string ToString(string format, IFormatProvider provider) =>
-		string.Format(provider, "({0}, {1})",
+	public string ToString(string format, IFormatProvider provider)
+		=> string.Format(provider, "({0}, {1})",
 			Real.ToString(format, provider),
 			Imaginary.ToString(format, provider));
 
@@ -133,17 +130,17 @@ public readonly struct Complex : IEquatable<Complex>, IFormattable
 
 	public override int GetHashCode() => Real.GetHashCode() % 99999997 ^ Imaginary.GetHashCode();
 
-	public static Complex Sin(double real, double imaginary) =>
-		new(Math.Sin(real) * Math.Cosh(imaginary), Math.Cos(real) * Math.Sinh(imaginary));
+	public static Complex Sin(double real, double imaginary)
+		=> new(Math.Sin(real) * Math.Cosh(imaginary), Math.Cos(real) * Math.Sinh(imaginary));
 
-	public static Complex Sinh(double real, double imaginary) =>
-		new(Math.Sinh(real) * Math.Cos(imaginary), Math.Cosh(real) * Math.Sin(imaginary));
+	public static Complex Sinh(double real, double imaginary)
+		=> new(Math.Sinh(real) * Math.Cos(imaginary), Math.Cosh(real) * Math.Sin(imaginary));
 
-	public static Complex Cos(double real, double imaginary) =>
-		new(Math.Cos(real) * Math.Cosh(imaginary), -(Math.Sin(real) * Math.Sinh(imaginary)));
+	public static Complex Cos(double real, double imaginary)
+		=> new(Math.Cos(real) * Math.Cosh(imaginary), -(Math.Sin(real) * Math.Sinh(imaginary)));
 	
-	public static Complex Cosh(double real, double imaginary) =>
-		new(Math.Cosh(real) * Math.Cos(imaginary), Math.Sinh(real) * Math.Sin(imaginary));
+	public static Complex Cosh(double real, double imaginary)
+		=> new(Math.Cosh(real) * Math.Cos(imaginary), Math.Sinh(real) * Math.Sin(imaginary));
 
 	public static Complex Sin(Complex value) => Sin(value.Real, value.Imaginary);
 	public static Complex Sinh(Complex value) => Sinh(value.Real, value.Imaginary);
@@ -157,14 +154,14 @@ public readonly struct Complex : IEquatable<Complex>, IFormattable
 	public static Complex Tanh(Complex value) => Sinh(value) / Cosh(value);
 	public static Complex Atan(Complex value) => ImaginaryOne / RealTwo * (Log(One - ImaginaryOne * value) - Log(One + ImaginaryOne * value));
 
-	public static Complex Log(Complex value) =>
-		new(Math.Log(Abs(value)), Math.Atan2(value.Imaginary, value.Real));
+	public static Complex Log(Complex value)
+		=> new(Math.Log(Abs(value)), Math.Atan2(value.Imaginary, value.Real));
 
 	public static Complex Log(Complex value, double baseValue) => Log(value) / Log(baseValue);
 	public static Complex Log10(Complex value) => Scale(Log(value), 0.43429448190325);
 
-	public static Complex FromPolarCoordinates(double magnitude, double phase) =>
-		new(magnitude * Math.Cos(phase), magnitude * Math.Sin(phase));
+	public static Complex FromPolarCoordinates(double magnitude, double phase)
+		=> new(magnitude * Math.Cos(phase), magnitude * Math.Sin(phase));
 	
 	public static Complex Exp(Complex value) => FromPolarCoordinates(Math.Exp(value.Real), value.Imaginary);
 	public static Complex Sqrt(Complex value) => FromPolarCoordinates(Math.Sqrt(value.Magnitude), value.Phase / 2.0);
@@ -190,6 +187,6 @@ public readonly struct Complex : IEquatable<Complex>, IFormattable
 
 	public static Complex Scale(Complex value, double factor) => Scale(value.Real, value.Imaginary, factor);
 	
-	public static Complex Scale(double real, double imaginary, double factor) =>
-		new(factor * real, factor * imaginary);
+	public static Complex Scale(double real, double imaginary, double factor)
+		=> new(factor * real, factor * imaginary);
 }

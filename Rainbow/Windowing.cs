@@ -18,17 +18,18 @@ public class Windowing
 		return Exp(-t * (t / 2));
 	}
 
-	public static double Hamming(double n, double length) =>
-		0.54 - 0.46 * Cos(2 * PI * n / (length - 1));
+	public static double Hamming(double n, double length)
+		=> 0.54 - 0.46 * Cos(2 * PI * n / (length - 1));
 
-	public static double Hann(double n, double length) =>
-		0.5 * (1.0 - Cos(2 * PI * n / (length - 1)));
+	public static double Hann(double n, double length)
+		=> 0.5 * (1.0 - Cos(2 * PI * n / (length - 1)));
 
-	public static double BlackmanHarris(double n, double length) =>
-		0.35875 -
-		0.48829 * Cos(2 * PI * n / (length - 1)) +
-		0.14128 * Cos(4 * PI * n / (length - 1)) -
-		0.01168 * Cos(4 * PI * n / (length - 1));
+	public static double BlackmanHarris(double n, double length)
+		=> 0.35875
+		- 0.48829 * Cos(2 * PI * n / (length - 1))
+		+ 0.14128 * Cos(4 * PI * n / (length - 1))
+		- 0.01168 * Cos(4 * PI * n / (length - 1))
+		;
 
 	public static Complex WaveWavelet(Complex n, Complex length) => WaveWavelet(n / length);
 	public static double SombreroWavelet(double n, double length) => SombreroWavelet(n / length);

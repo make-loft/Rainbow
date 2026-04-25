@@ -36,13 +36,13 @@ public static partial class Butterfly
 		return workSample;
 	}
 
-	static readonly Dictionary<int, Complex[]> DirectRotors = new();
-	static readonly Dictionary<int, Complex[]> RevertRotors = new();
+	static readonly Dictionary<int, Complex[]> DirectRotors = [];
+	static readonly Dictionary<int, Complex[]> RevertRotors = [];
 
 	static Complex[] GenerateRotor(int length, bool direct)
 	{
-		var abs = (Pi.Single / length).InvertSign(direct);
-		var rotorBase = new Complex(Cos(abs), Sin(abs));
+		var angle = (Pi.Single / length).InvertSign(direct);
+		var rotorBase = new Complex(Cos(angle), Sin(angle));
 		var rotor = new Complex[length];
 		for (var i = 0; i < length; i++)
 			rotor[i] = Complex.Pow(rotorBase, i);
