@@ -19,7 +19,7 @@ public static partial class Filtering
 		if (turn && distance < -1.0)
 			distance += 2.0;
 
-		var peakByPhaseState = (distance * distance).HitInterval(from: 0.5, till :2.0 + 0.01);
+		var peakByPhaseState = (distance * distance).HitInterval(from: 0.5, till: 2.0 + 0.01);
 		if (peakByPhaseState is false)
 		{
 			peak = default;
@@ -59,12 +59,12 @@ public static partial class Filtering
 	}
 
 	public static List<Bin> Interpolate(this IList<Bin> spectrum, out List<Bin> peaks)
-		=> spectrum.Interpolate(peaks = new()).ToList();
+		=> spectrum.Interpolate(peaks = []).ToList();
 
 	private static IEnumerable<Bin> Interpolate(this IList<Bin> spectrum, List<Bin> peaks)
 	{
 		var count = spectrum.Count / 2 - 3;
-		if (count < 0) throw new Exception("Spectrum size is too short");
+		if (count < 0) throw new("Spectrum size is too short");
 
 		for (var i = 0; i < count; i++)
 		{
